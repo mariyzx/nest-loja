@@ -22,16 +22,16 @@ export class ProductsController {
   async create(@Body() productData: CreateProductDTO) {
     const produtoEntity = new ProductEntity();
 
-    produtoEntity.specifications = productData.specifications;
     produtoEntity.category = productData.category;
     produtoEntity.updatedAt = productData.updatedAt;
     produtoEntity.createdAt = productData.createdAt;
     produtoEntity.description = productData.description;
-    produtoEntity.images = productData.images;
     produtoEntity.name = productData.name;
     produtoEntity.availableQuantity = productData.availableQuantity;
     produtoEntity.value = productData.value;
     produtoEntity.id = uuid();
+    // produtoEntity.images = productData.images;
+    // produtoEntity.specifications = productData.specifications;
 
     await this.productRepository.create(produtoEntity);
     return productData;
