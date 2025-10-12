@@ -38,12 +38,14 @@ export class ProductEntity {
   @OneToMany(
     () => ProductSpecificationsEntity,
     (productSpecificationEntity) => productSpecificationEntity.product,
+    { cascade: true, eager: true },
   )
   specifications: ProductSpecificationsEntity[];
 
   @OneToMany(
     () => ProductImageEntity,
     (productImageEntity) => productImageEntity.product,
+    { cascade: true, eager: true },
   )
   images: ProductImageEntity[];
 

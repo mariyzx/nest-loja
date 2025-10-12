@@ -16,6 +16,10 @@ export class ProductImageEntity {
   })
   description: string;
 
-  @ManyToOne(() => ProductEntity, (produto) => produto.images)
+  @ManyToOne(() => ProductEntity, (produto) => produto.images, {
+    orphanedRowAction: 'delete',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   product: ProductEntity;
 }
