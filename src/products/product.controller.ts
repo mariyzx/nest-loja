@@ -12,11 +12,11 @@ import { v4 as uuid } from 'uuid';
 import { ProductEntity } from './product.entity';
 import { CreateProductDTO } from './dto/CreateProduct.dto';
 import { UpdateProductDTO } from './dto/UpdateProduct';
-import { ProductRepository } from './product.repository';
+import { ProductService } from './product.service';
 
 @Controller('/products')
 export class ProductsController {
-  constructor(private productRepository: ProductRepository) {}
+  constructor(private productService: ProductService) {}
 
   @Post()
   async create(@Body() productData: CreateProductDTO) {
@@ -33,18 +33,18 @@ export class ProductsController {
     // produtoEntity.images = productData.images;
     // produtoEntity.specifications = productData.specifications;
 
-    await this.productRepository.create(produtoEntity);
+    await this.productService.create(produtoEntity);
     return productData;
   }
 
   @Get()
   async getProducts() {
-    return this.productRepository.getProducts();
+    return this.productService.getProducts();
   }
 
   @Put('/:id')
   async update(@Param('id') id: string, @Body() newData: UpdateProductDTO) {
-    const updatedProduct = await this.productRepository.update(id, newData);
+    const updatedProduct = await this.productService.update(id, newData);
 
     return {
       produto: updatedProduct,
@@ -54,7 +54,7 @@ export class ProductsController {
 
   @Delete('/:id')
   async delete(@Param('id') id: string) {
-    const deletedProduct = await this.productRepository.delete(id);
+    const deletedProduct = await this.productService.delete(id);
     return {
       produto: deletedProduct,
       mensagem: 'Product deleted successfully!',
