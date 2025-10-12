@@ -30,8 +30,8 @@ export class ProductsController {
     produtoEntity.availableQuantity = productData.availableQuantity;
     produtoEntity.value = productData.value;
     produtoEntity.id = uuid();
-    // produtoEntity.images = productData.images;
-    // produtoEntity.specifications = productData.specifications;
+    produtoEntity.images = productData.images;
+    produtoEntity.specifications = productData.specifications;
 
     await this.productService.create(produtoEntity);
     return productData;

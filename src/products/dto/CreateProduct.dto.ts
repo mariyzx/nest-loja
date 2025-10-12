@@ -4,8 +4,36 @@ import {
   IsNotEmpty,
   IsPositive,
   IsString,
+  IsUrl,
   MinLength,
 } from 'class-validator';
+import { ProductEntity } from '../product.entity';
+
+export class ProductSpecificationDTO {
+  id: string;
+
+  @IsString({ message: 'Name must be a string' })
+  @IsNotEmpty({ message: 'Name cannot be empty' })
+  name: string;
+
+  @IsString({ message: 'Description must be a string' })
+  @IsNotEmpty({ message: 'Description cannot be empty' })
+  description: string;
+
+  product: ProductEntity;
+}
+
+export class ProductImageDTO {
+  id: string;
+  @IsUrl({}, { message: 'URL must be a valid URL' })
+  url: string;
+
+  @IsString({ message: 'Description must be a string' })
+  @IsNotEmpty({ message: 'Description cannot be empty' })
+  description: string;
+
+  product: ProductEntity;
+}
 
 export class CreateProductDTO {
   @IsString({ message: 'Name must be a string' })
@@ -28,13 +56,13 @@ export class CreateProductDTO {
   @ArrayMinSize(3, {
     message: 'Specifications must have at least 3 items',
   })
-  specifications: { name: string; description: string }[];
+  specifications: ProductSpecificationDTO[];
 
   @IsArray({ message: 'Images must be an array' })
   @ArrayMinSize(1, {
     message: 'Images must have at least 1 item',
   })
-  images: { url: string; description: string }[];
+  images: ProductImageDTO[];
 
   @IsNotEmpty({ message: 'Category cannot be empty' })
   category: string;

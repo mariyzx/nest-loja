@@ -6,6 +6,7 @@ import {
   IsPositive,
   MinLength,
 } from 'class-validator';
+import { ProductImageDTO, ProductSpecificationDTO } from './CreateProduct.dto';
 
 export class UpdateProductDTO {
   @IsNotEmpty({ message: 'Name cannot be empty' })
@@ -32,14 +33,14 @@ export class UpdateProductDTO {
     message: 'Specifications must have at least 3 items',
   })
   @IsOptional()
-  specifications: { name: string; description: string }[];
+  specifications: ProductSpecificationDTO[];
 
   @IsArray({ message: 'Images must be an array' })
   @ArrayMinSize(1, {
     message: 'Images must have at least 1 item',
   })
   @IsOptional()
-  images: { url: string; description: string }[];
+  images: ProductImageDTO[];
 
   @IsNotEmpty({ message: 'Category cannot be empty' })
   @IsOptional()

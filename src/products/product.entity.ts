@@ -5,7 +5,10 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   PrimaryGeneratedColumn,
+  OneToMany,
 } from 'typeorm';
+import { ProductSpecificationsEntity } from './product-specification.entity';
+import { ProductImageEntity } from './product-image.entity';
 
 @Entity('products')
 export class ProductEntity {
@@ -32,8 +35,17 @@ export class ProductEntity {
   })
   description: string;
 
-  // specifications: Specifications[];
-  // images: Image[];
+  @OneToMany(
+    () => ProductSpecificationsEntity,
+    (productSpecificationEntity) => productSpecificationEntity.product,
+  )
+  specifications: ProductSpecificationsEntity[];
+
+  @OneToMany(
+    () => ProductImageEntity,
+    (productImageEntity) => productImageEntity.product,
+  )
+  images: ProductImageEntity[];
 
   @Column({ name: 'category', type: 'varchar', length: 200, nullable: false })
   category: string;
