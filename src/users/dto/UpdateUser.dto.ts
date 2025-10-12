@@ -1,7 +1,7 @@
 import { IsEmail, IsNotEmpty, IsOptional, MinLength } from 'class-validator';
 import { isUniqueEmail } from '../validation/unique-email.validator';
 
-export class UpdateUser {
+export class UpdateUserDTO {
   @IsNotEmpty({ message: 'O nome não pode ser vazio' })
   @IsOptional()
   name: string;

@@ -10,7 +10,7 @@ import {
 import { UserRepository } from './user.repository';
 import { v4 as uuid } from 'uuid';
 import { ListUserDTO } from './dto/ListUser.dto';
-import { UpdateUser } from './dto/UpdateUser.dto';
+import { UpdateUserDTO } from './dto/UpdateUser.dto';
 import { CreateUserDTO } from './dto/CreateUser.dto';
 import { UserEntity } from './user.entity';
 import { UserService } from './user.service';
@@ -45,8 +45,8 @@ export class UserController {
   }
 
   @Put('/:id')
-  async update(@Param('id') id: string, @Body() newData: UpdateUser) {
-    const updatedUser = await this.userRepository.update(id, newData);
+  async update(@Param('id') id: string, @Body() newData: UpdateUserDTO) {
+    const updatedUser = await this.userService.update(id, newData);
 
     return {
       user: updatedUser,
@@ -56,7 +56,10 @@ export class UserController {
 
   @Delete('/:id')
   async delete(@Param('id') id: string) {
-    const removedUser = await this.userRepository.delete(id);
+    const removedUser = await this.userService.delete(id);
+    if (!removedUser || removedUser === undefined) {
+      throw new Error('User not found');
+    }
     const user = new ListUserDTO(removedUser.id, removedUser.name);
 
     return {
