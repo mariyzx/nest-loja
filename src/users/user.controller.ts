@@ -13,10 +13,14 @@ import { ListUserDTO } from './dto/ListUser.dto';
 import { UpdateUser } from './dto/UpdateUser.dto';
 import { CreateUserDTO } from './dto/CreateUser.dto';
 import { UserEntity } from './user.entity';
+import { UserService } from './user.service';
 
 @Controller('/users')
 export class UserController {
-  constructor(private userRepository: UserRepository) {}
+  constructor(
+    private userRepository: UserRepository,
+    private userService: UserService,
+  ) {}
 
   @Post()
   async create(@Body() userData: CreateUserDTO) {
@@ -27,7 +31,7 @@ export class UserController {
     userEntity.name = userData.name;
     userEntity.id = uuid();
 
-    await this.userRepository.create(userEntity);
+    await this.userService.create(userEntity);
     return {
       user: new ListUserDTO(userEntity.id, userEntity.name),
       message: 'User created successfully!',
@@ -36,9 +40,8 @@ export class UserController {
 
   @Get()
   async getUsers() {
-    const users = await this.userRepository.getUsers();
-    const usersList = users.map((user) => new ListUserDTO(user.id, user.name));
-    return usersList;
+    const users = await this.userService.getUsers();
+    return users;
   }
 
   @Put('/:id')
