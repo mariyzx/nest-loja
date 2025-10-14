@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { ListUserDTO } from './dto/ListUser.dto';
 import { UpdateUserDTO } from './dto/UpdateUser.dto';
 import { CreateUserDTO } from './dto/CreateUser.dto';
-import { v4 as uuid } from 'uuid';
 
 export class UserService {
   constructor(
@@ -18,7 +17,6 @@ export class UserService {
     userEntity.email = userData.email;
     userEntity.password = userData.password;
     userEntity.name = userData.name;
-    userEntity.id = uuid();
 
     const user = await this.userRepository.save(userEntity);
     return user;

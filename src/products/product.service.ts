@@ -3,7 +3,6 @@ import { ProductEntity } from './product.entity';
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { CreateProductDTO } from './dto/CreateProduct.dto';
-import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class ProductService {
@@ -22,7 +21,6 @@ export class ProductService {
     productEntity.name = productData.name;
     productEntity.availableQuantity = productData.availableQuantity;
     productEntity.value = productData.value;
-    productEntity.id = uuid();
     productEntity.images = productData.images;
     productEntity.specifications = productData.specifications;
 
