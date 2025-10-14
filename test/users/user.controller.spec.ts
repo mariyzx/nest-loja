@@ -65,18 +65,17 @@ describe('UserController', () => {
         password: 'password123',
       };
 
-      (service.create as jest.Mock).mockResolvedValueOnce(undefined);
+      const createdUser = makeEntity({
+        id: 'mocked-uuid',
+        name: 'John Doe',
+        email: 'john@example.com',
+        password: 'password123',
+      });
+      (service.create as jest.Mock).mockResolvedValueOnce(createdUser);
 
       const result = await controller.create(dto);
 
-      expect(service.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'mocked-uuid',
-          name: 'John Doe',
-          email: 'john@example.com',
-          password: 'password123',
-        }),
-      );
+      expect(service.create).toHaveBeenCalledWith(dto);
       expect(result).toEqual({
         user: new ListUserDTO('mocked-uuid', 'John Doe'),
         message: 'User created successfully!',

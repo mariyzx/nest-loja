@@ -55,13 +55,25 @@ describe('UserService', () => {
   });
 
   describe('create', () => {
-    it('should save the entity', async () => {
-      const user = makeEntity();
-      repository.save.mockResolvedValueOnce(user);
+    it('should save the entity and return it', async () => {
+      const userData = {
+        name: 'John Doe',
+        email: 'john@example.com',
+        password: 'password123',
+      };
+      const savedUser = makeEntity(userData);
+      repository.save.mockResolvedValueOnce(savedUser);
 
-      await service.create(user);
+      const result = await service.create(userData);
 
-      expect(repository.save).toHaveBeenCalledWith(user);
+      expect(repository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'John Doe',
+          email: 'john@example.com',
+          password: 'password123',
+        }),
+      );
+      expect(result).toEqual(savedUser);
     });
   });
 

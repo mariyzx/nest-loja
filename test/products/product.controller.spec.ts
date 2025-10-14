@@ -25,6 +25,21 @@ describe('ProductsController', () => {
     delete: jest.fn(),
   };
 
+  const makeEntity = (overrides?: Partial<ProductEntity>): ProductEntity => ({
+    id: overrides?.id ?? 'p-1',
+    userId: overrides?.userId ?? 'u-1',
+    name: overrides?.name ?? 'Product',
+    value: overrides?.value ?? 100,
+    availableQuantity: overrides?.availableQuantity ?? 10,
+    description: overrides?.description ?? 'Product description',
+    specifications: overrides?.specifications ?? [],
+    images: overrides?.images ?? [],
+    category: overrides?.category ?? 'general',
+    createdAt: overrides?.createdAt ?? '2024-01-01T00:00:00Z',
+    updatedAt: overrides?.updatedAt ?? '2024-01-02T00:00:00Z',
+    deletedAt: overrides?.deletedAt ?? '2024-01-03T00:00:00Z',
+  });
+
   const makeImage = (
     overrides?: Partial<{ url: string; description: string }>,
   ) => ({
@@ -88,45 +103,20 @@ describe('ProductsController', () => {
         ],
       };
 
-      /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+      const createdProduct = makeEntity({
+        id: 'product-id',
+        name: dto.name,
+        value: dto.value,
+      });
+      service.create.mockResolvedValueOnce(createdProduct);
+
       const result = await controller.create(dto);
 
-      expect(service.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'mocked-uuid',
-          name: 'Fone JBL',
-          category: 'eletrônicos',
-          description: 'fone bluetooth',
-          availableQuantity: 10,
-          value: 199.99,
-          // O controller repassa strings (não Date) conforme a entidade atual
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-02T00:00:00Z',
-          images: expect.arrayContaining([
-            expect.objectContaining({
-              url: 'https://cdn.exemplo.com/img1.jpg',
-              description: 'frente',
-            }),
-            expect.objectContaining({
-              url: 'https://cdn.exemplo.com/img2.jpg',
-              description: 'verso',
-            }),
-          ]),
-          specifications: expect.arrayContaining([
-            expect.objectContaining({
-              name: 'conexão',
-              description: 'bluetooth 5.0',
-            }),
-            expect.objectContaining({
-              name: 'autonomia',
-              description: '5h',
-            }),
-          ]),
-        }),
-      );
-
-      expect(result).toBe(dto);
-      /* eslint-enable @typescript-eslint/no-unsafe-assignment */
+      expect(service.create).toHaveBeenCalledWith(dto);
+      expect(result).toEqual({
+        product: createdProduct,
+        message: 'Product created successfully!',
+      });
     });
   });
 

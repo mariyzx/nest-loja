@@ -65,6 +65,34 @@ Para executar os testes:
 # testes unitários
 npm run test
 
+# testes em modo watch (re-executa quando arquivos mudam)
+npm run test:watch
+
+# cobertura de testes
+npm run test:cov
+
+# testes e2e
+npm run test:e2e
+```
+
+### Estrutura de Testes
+
+Os testes unitários estão organizados na pasta `test/` com a seguinte estrutura:
+- `test/users/` - Testes para o módulo de usuários
+  - `user.controller.spec.ts` - Testes do UserController
+  - `user.service.spec.ts` - Testes do UserService
+- `test/products/` - Testes para o módulo de produtos
+  - `product.controller.spec.ts` - Testes do ProductsController
+  - `product.service.spec.ts` - Testes do ProductService
+
+## 🧪 Testes
+
+Para executar os testes:
+
+```bash
+# testes unitários
+npm run test
+
 # testes e2e
 npm run test:e2e
 

@@ -64,7 +64,15 @@ describe('ProductService', () => {
 
       const result = await service.create(entity);
 
-      expect(repository.save).toHaveBeenCalledWith(entity);
+      expect(repository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: entity.name,
+          value: entity.value,
+          availableQuantity: entity.availableQuantity,
+          description: entity.description,
+          category: entity.category,
+        }),
+      );
       expect(result).toEqual(entity);
     });
   });
