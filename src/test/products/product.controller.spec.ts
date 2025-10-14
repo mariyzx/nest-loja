@@ -1,0 +1,210 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { ProductsController } from '../../products/product.controller';
+import { ProductService } from '../../products/product.service';
+import { CreateProductDTO } from '../../products/dto/CreateProduct.dto';
+import { UpdateProductDTO } from '../../products/dto/UpdateProduct';
+import { ProductEntity } from '../../products/product.entity';
+import { DeleteResult, UpdateResult } from 'typeorm';
+
+jest.mock('uuid', () => ({
+  v4: jest.fn(() => 'mocked-uuid'),
+}));
+
+type ProductServiceMock = jest.Mocked<
+  Pick<ProductService, 'create' | 'getProducts' | 'update' | 'delete'>
+>;
+
+describe('ProductsController', () => {
+  let controller: ProductsController;
+  let service: ProductServiceMock;
+
+  const mockProductService: ProductServiceMock = {
+    create: jest.fn(),
+    getProducts: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+  };
+
+  const makeImage = (
+    overrides?: Partial<{ url: string; description: string }>,
+  ) => ({
+    id: 'img-1',
+    url: overrides?.url ?? 'https://cdn.exemplo.com/img1.jpg',
+    description: overrides?.description ?? 'lorem ipsum',
+    product: undefined as unknown as ProductEntity,
+  });
+
+  const makeSpec = (
+    overrides?: Partial<{ name: string; description: string }>,
+  ) => ({
+    id: 'spec-1',
+    name: overrides?.name ?? 'conection',
+    description: overrides?.description ?? 'bluetooth 5.0',
+    // compatível com ProductSpecificationDTO.product, não é usado no create
+    product: undefined as unknown as ProductEntity,
+  });
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [ProductsController],
+      providers: [
+        {
+          provide: ProductService,
+          useValue: mockProductService,
+        },
+      ],
+    }).compile();
+
+    controller = module.get<ProductsController>(ProductsController);
+    // Como usamos useValue, o service é exatamente o mock
+    service = mockProductService;
+
+    jest.clearAllMocks();
+  });
+
+  describe('POST /products (create)', () => {
+    it('should create a product and return it', async () => {
+      const dto: CreateProductDTO = {
+        category: 'eletrônicos',
+        updatedAt: '2024-01-02T00:00:00Z',
+        createdAt: '2024-01-01T00:00:00Z',
+        description: 'fone bluetooth',
+        name: 'Fone JBL',
+        availableQuantity: 10,
+        value: 199.99,
+        images: [
+          makeImage({
+            url: 'https://cdn.exemplo.com/img1.jpg',
+            description: 'frente',
+          }),
+          makeImage({
+            url: 'https://cdn.exemplo.com/img2.jpg',
+            description: 'verso',
+          }),
+        ],
+        specifications: [
+          makeSpec({ name: 'conexão', description: 'bluetooth 5.0' }),
+          makeSpec({ name: 'autonomia', description: '5h' }),
+        ],
+      };
+
+      /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+      const result = await controller.create(dto);
+
+      expect(service.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'mocked-uuid',
+          name: 'Fone JBL',
+          category: 'eletrônicos',
+          description: 'fone bluetooth',
+          availableQuantity: 10,
+          value: 199.99,
+          // O controller repassa strings (não Date) conforme a entidade atual
+          createdAt: '2024-01-01T00:00:00Z',
+          updatedAt: '2024-01-02T00:00:00Z',
+          images: expect.arrayContaining([
+            expect.objectContaining({
+              url: 'https://cdn.exemplo.com/img1.jpg',
+              description: 'frente',
+            }),
+            expect.objectContaining({
+              url: 'https://cdn.exemplo.com/img2.jpg',
+              description: 'verso',
+            }),
+          ]),
+          specifications: expect.arrayContaining([
+            expect.objectContaining({
+              name: 'conexão',
+              description: 'bluetooth 5.0',
+            }),
+            expect.objectContaining({
+              name: 'autonomia',
+              description: '5h',
+            }),
+          ]),
+        }),
+      );
+
+      expect(result).toBe(dto);
+      /* eslint-enable @typescript-eslint/no-unsafe-assignment */
+    });
+  });
+
+  describe('GET /products (getProducts)', () => {
+    it('should return the list from the service', async () => {
+      const mockList: ProductEntity[] = [
+        {
+          id: '1',
+          userId: 'u1',
+          name: 'A',
+          value: 0,
+          availableQuantity: 0,
+          description: 'desc A',
+          specifications: [],
+          images: [],
+          category: 'cat',
+          createdAt: '2024-01-01T00:00:00Z',
+          updatedAt: '2024-01-02T00:00:00Z',
+          deletedAt: '2024-01-03T00:00:00Z',
+        },
+        {
+          id: '2',
+          userId: 'u2',
+          name: 'B',
+          value: 0,
+          availableQuantity: 0,
+          description: 'desc B',
+          specifications: [],
+          images: [],
+          category: 'cat',
+          createdAt: '2024-01-01T00:00:00Z',
+          updatedAt: '2024-01-02T00:00:00Z',
+          deletedAt: '2024-01-03T00:00:00Z',
+        },
+      ];
+      service.getProducts.mockResolvedValueOnce(mockList);
+
+      const result = await controller.getProducts();
+
+      expect(service.getProducts).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockList);
+    });
+  });
+
+  describe('PUT /products/:id (update)', () => {
+    it('should update and return a payload with a message', async () => {
+      const id = '123';
+      const newData: UpdateProductDTO = {
+        name: 'new name',
+        description: 'new desc',
+      } as UpdateProductDTO;
+
+      const updated: UpdateResult = { raw: {}, generatedMaps: [], affected: 1 };
+      service.update.mockResolvedValueOnce(updated);
+
+      const result = await controller.update(id, newData);
+
+      expect(service.update).toHaveBeenCalledWith(id, newData);
+      expect(result).toEqual({
+        produto: updated,
+        mensagem: 'Product updated successfully!',
+      });
+    });
+  });
+
+  describe('DELETE /products/:id (delete)', () => {
+    it('should delete and return a payload with a message', async () => {
+      const id = '999';
+      const deleted: DeleteResult = { raw: {}, affected: 1 };
+      service.delete.mockResolvedValueOnce(deleted);
+
+      const result = await controller.delete(id);
+
+      expect(service.delete).toHaveBeenCalledWith(id);
+      expect(result).toEqual({
+        produto: deleted,
+        mensagem: 'Product deleted successfully!',
+      });
+    });
+  });
+});
