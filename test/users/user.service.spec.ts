@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
-import { UserService } from '../../users/user.service';
-import { UserEntity } from '../../users/user.entity';
-import { ListUserDTO } from '../../users/dto/ListUser.dto';
-import { UpdateUserDTO } from '../../users/dto/UpdateUser.dto';
+import { UserService } from '../../src/users/user.service';
+import { UserEntity } from '../../src/users/user.entity';
+import { ListUserDTO } from '../../src/users/dto/ListUser.dto';
+import { UpdateUserDTO } from '../../src/users/dto/UpdateUser.dto';
 
 type RepoMock = Pick<
   Repository<UserEntity>,

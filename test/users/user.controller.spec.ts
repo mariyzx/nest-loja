@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserController } from '../../users/user.controller';
-import { UserService } from '../../users/user.service';
-import { CreateUserDTO } from '../../users/dto/CreateUser.dto';
-import { UpdateUserDTO } from '../../users/dto/UpdateUser.dto';
-import { ListUserDTO } from '../../users/dto/ListUser.dto';
-import { UserEntity } from '../../users/user.entity';
-import { UserRepository } from '../../users/user.repository';
+import { UserController } from '../../src/users/user.controller';
+import { UserService } from '../../src/users/user.service';
+import { CreateUserDTO } from '../../src/users/dto/CreateUser.dto';
+import { UpdateUserDTO } from '../../src/users/dto/UpdateUser.dto';
+import { ListUserDTO } from '../../src/users/dto/ListUser.dto';
+import { UserEntity } from '../../src/users/user.entity';
+import { UserRepository } from '../../src/users/user.repository';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mocked-uuid'),

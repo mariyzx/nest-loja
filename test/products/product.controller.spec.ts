@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ProductsController } from '../../products/product.controller';
-import { ProductService } from '../../products/product.service';
-import { CreateProductDTO } from '../../products/dto/CreateProduct.dto';
-import { UpdateProductDTO } from '../../products/dto/UpdateProduct';
-import { ProductEntity } from '../../products/product.entity';
+import { ProductsController } from '../../src/products/product.controller';
+import { ProductService } from '../../src/products/product.service';
+import { CreateProductDTO } from '../../src/products/dto/CreateProduct.dto';
+import { UpdateProductDTO } from '../../src/products/dto/UpdateProduct';
+import { ProductEntity } from '../../src/products/product.entity';
 import { DeleteResult, UpdateResult } from 'typeorm';
 
 jest.mock('uuid', () => ({

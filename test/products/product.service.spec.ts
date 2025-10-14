@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, UpdateResult, DeleteResult } from 'typeorm';
-import { ProductService } from '../../products/product.service';
-import { ProductEntity } from '../../products/product.entity';
+import { ProductService } from '../../src/products/product.service';
+import { ProductEntity } from '../../src/products/product.entity';
 
 type RepoMock = Pick<
   Repository<ProductEntity>,
