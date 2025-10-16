@@ -9,7 +9,7 @@ export class DropUserIdFromProducts1760651274033 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `ALTER TABLE "products" ADD "user_id" character varying NOT NULL`,
+      `ALTER TABLE "products" ADD "user_id" character varying`,
     );
   }
 }
