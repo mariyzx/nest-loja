@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { ArrayMinSize, IsArray, IsInt, ValidateNested } from 'class-validator';
 
-class OrderProductDTO {
+export class OrderProductDTO {
   @IsInt({ message: 'Product ID must be an integer' })
   quantity: number;
 }

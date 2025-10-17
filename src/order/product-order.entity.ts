@@ -1,8 +1,9 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { ProductEntity } from './product.entity';
+import { ProductEntity } from '../products/product.entity';
+import { OrderEntity } from './order.entity';
 
 @Entity({ name: 'product_order' })
-export class OrderEntity {
+export class ProductOrderEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -17,4 +18,10 @@ export class OrderEntity {
     onUpdate: 'CASCADE',
   })
   product: ProductEntity;
+
+  @ManyToOne(() => OrderEntity, (order) => order.productOrders, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  order: OrderEntity;
 }
