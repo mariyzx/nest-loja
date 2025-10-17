@@ -13,15 +13,14 @@ export class ProductOrderEntity {
   @Column({ name: 'sell_value', nullable: false })
   sellValue: number;
 
-  @ManyToOne(() => ProductEntity, (product) => product.orders, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  product: ProductEntity;
-
   @ManyToOne(() => OrderEntity, (order) => order.productOrders, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
   order: OrderEntity;
+
+  @ManyToOne(() => ProductEntity, (product) => product.orders, {
+    cascade: ['update'],
+  })
+  product: ProductEntity;
 }
