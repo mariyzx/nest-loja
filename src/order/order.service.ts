@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderEntity } from './order.entity';
 import { In, Repository } from 'typeorm';
@@ -29,6 +33,29 @@ export class OrderService {
     return user;
   }
 
+  private handleOrder(
+    orderData: CreateOrderDto,
+    relatedProducts: ProductEntity[],
+  ) {
+    orderData.orderProducts.forEach((item: OrderProductDTO) => {
+      const relatedProduct = relatedProducts.find(
+        (prod) => prod.id === item.productId,
+      );
+
+      if (!relatedProduct) {
+        throw new NotFoundException(
+          `Product with ID ${item.productId} not found!`,
+        );
+      }
+
+      if (relatedProduct.availableQuantity < item.quantity) {
+        throw new BadRequestException(
+          `Insufficient stock for product ID ${item.productId}!`,
+        );
+      }
+    });
+  }
+
   async createOrder(
     userId: string,
     orderData: CreateOrderDto,
@@ -40,21 +67,15 @@ export class OrderService {
     const relatedProducts = await this.productRepository.findBy({
       id: In(productsIds),
     });
-
+    this.handleOrder(orderData, relatedProducts);
     const itemEntity = orderData.orderProducts.map((item: OrderProductDTO) => {
       const productOrderEntity = new ProductOrderEntity();
       const relatedProduct = relatedProducts.find(
         (prod) => prod.id === item.productId,
       );
 
-      if (!relatedProduct) {
-        throw new NotFoundException(
-          `Product with ID ${item.productId} not found!`,
-        );
-      }
-
-      productOrderEntity.product = relatedProduct;
-      productOrderEntity.sellValue = relatedProduct ? relatedProduct.value : 0;
+      productOrderEntity.product = relatedProduct!;
+      productOrderEntity.sellValue = relatedProduct!.value;
       productOrderEntity.quantity = item.quantity;
       productOrderEntity.product.availableQuantity -= item.quantity;
 
