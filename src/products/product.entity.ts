@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { ProductSpecificationsEntity } from './product-specification.entity';
 import { ProductImageEntity } from './product-image.entity';
+import { OrderEntity } from './product-order.entity';
 
 @Entity('products')
 export class ProductEntity {
@@ -55,4 +56,9 @@ export class ProductEntity {
   updatedAt: string;
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt: string;
+
+  @OneToMany(() => OrderEntity, (order) => order.product, {
+    cascade: true, // cria automaticamente as ordens relacionadas ao produto
+  })
+  orders: OrderEntity[];
 }
