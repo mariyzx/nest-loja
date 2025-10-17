@@ -7,6 +7,7 @@ import { CreateOrderDto, OrderProductDTO } from './dto/CreateOrder.dto';
 import { ProductOrderEntity } from './product-order.entity';
 import { ProductEntity } from '../products/product.entity';
 import { OrderStatus } from './enum/OrderStatus.enum';
+import { UpdateOrderDto } from './dto/UpdateOrder.dto';
 
 @Injectable()
 export class OrderService {
@@ -61,5 +62,23 @@ export class OrderService {
     orderEntity.status = OrderStatus.PENDING;
     orderEntity.user = user;
     return this.orderRepository.save(orderEntity);
+  }
+
+  async updateOrder(
+    orderId: string,
+    orderData: Partial<UpdateOrderDto>,
+  ): Promise<OrderEntity> {
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+      relations: ['productOrders', 'productOrders.product'],
+    });
+
+    if (!order) {
+      throw new Error('Order not found');
+    }
+
+    Object.assign(order, orderData);
+
+    return this.orderRepository.save(order);
   }
 }
