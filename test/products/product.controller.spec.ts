@@ -27,7 +27,6 @@ describe('ProductsController', () => {
 
   const makeEntity = (overrides?: Partial<ProductEntity>): ProductEntity => ({
     id: overrides?.id ?? 'p-1',
-    userId: overrides?.userId ?? 'u-1',
     name: overrides?.name ?? 'Product',
     value: overrides?.value ?? 100,
     availableQuantity: overrides?.availableQuantity ?? 10,
@@ -38,6 +37,7 @@ describe('ProductsController', () => {
     createdAt: overrides?.createdAt ?? '2024-01-01T00:00:00Z',
     updatedAt: overrides?.updatedAt ?? '2024-01-02T00:00:00Z',
     deletedAt: overrides?.deletedAt ?? '2024-01-03T00:00:00Z',
+    orders: overrides?.orders ?? [],
   });
 
   const makeImage = (
@@ -125,7 +125,6 @@ describe('ProductsController', () => {
       const mockList: ProductEntity[] = [
         {
           id: '1',
-          userId: 'u1',
           name: 'A',
           value: 0,
           availableQuantity: 0,
@@ -136,10 +135,10 @@ describe('ProductsController', () => {
           createdAt: '2024-01-01T00:00:00Z',
           updatedAt: '2024-01-02T00:00:00Z',
           deletedAt: '2024-01-03T00:00:00Z',
+          orders: [],
         },
         {
           id: '2',
-          userId: 'u2',
           name: 'B',
           value: 0,
           availableQuantity: 0,
@@ -150,6 +149,7 @@ describe('ProductsController', () => {
           createdAt: '2024-01-01T00:00:00Z',
           updatedAt: '2024-01-02T00:00:00Z',
           deletedAt: '2024-01-03T00:00:00Z',
+          orders: [],
         },
       ];
       service.getProducts.mockResolvedValueOnce(mockList);

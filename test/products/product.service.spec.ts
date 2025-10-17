@@ -15,7 +15,6 @@ describe('ProductService', () => {
 
   const makeEntity = (overrides?: Partial<ProductEntity>): ProductEntity => ({
     id: overrides?.id ?? 'p-1',
-    userId: overrides?.userId ?? 'u-1',
     name: overrides?.name ?? 'Produto',
     value: overrides?.value ?? 100,
     availableQuantity: overrides?.availableQuantity ?? 10,
@@ -26,6 +25,7 @@ describe('ProductService', () => {
     createdAt: overrides?.createdAt ?? '2024-01-01T00:00:00Z',
     updatedAt: overrides?.updatedAt ?? '2024-01-02T00:00:00Z',
     deletedAt: overrides?.deletedAt ?? '2024-01-03T00:00:00Z',
+    orders: overrides?.orders ?? [],
   });
 
   const repoMockFactory = (): jest.Mocked<RepoMock> => ({
@@ -108,15 +108,16 @@ describe('ProductService', () => {
       expect(result).toEqual(updateResult);
     });
 
-    it('should return null when the product does not exist', async () => {
+    it('should return NotFoundException when the product does not exist', async () => {
       const id = 'inexistente';
       repository.findOneBy.mockResolvedValueOnce(null);
 
-      const result = await service.update(id, { name: 'X' });
+      await expect(service.update(id, { name: 'Nome' })).rejects.toThrow(
+        'Product not found',
+      );
 
       expect(repository.findOneBy).toHaveBeenCalledWith({ id });
       expect(repository.update).not.toHaveBeenCalled();
-      expect(result).toBeNull();
     });
   });
 
