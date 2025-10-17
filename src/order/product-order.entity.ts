@@ -10,7 +10,7 @@ export class ProductOrderEntity {
   @Column({ name: 'quantity', nullable: false })
   quantity: number;
 
-  @Column({ name: 'sell_value', nullable: false })
+  @Column({ name: 'sell_value', type: 'float', nullable: false })
   sellValue: number;
 
   @ManyToOne(() => OrderEntity, (order) => order.productOrders, {

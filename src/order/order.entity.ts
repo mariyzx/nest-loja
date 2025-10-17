@@ -17,7 +17,7 @@ export class OrderEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'total_value', nullable: false })
+  @Column({ name: 'total_value', type: 'float', nullable: false })
   totalValue: number;
 
   @Column({ name: 'status', enum: OrderStatus, nullable: false })
