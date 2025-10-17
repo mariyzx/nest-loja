@@ -15,10 +15,13 @@ Esta é uma API REST desenvolvida com NestJS para gerenciar uma loja virtual, pe
 
 - Gerenciamento de usuários (CRUD)
 - Gerenciamento de produtos (CRUD)
+- Gerenciamento de pedidos (CRUD)
 - Suporte a imagens de produtos
 - Especificações de produtos
 - Validação de dados
 - Validação de email único para usuários
+- Controle de estoque automático
+- Sistema de status de pedidos
 
 ## 📋 Pré-requisitos
 
@@ -121,6 +124,12 @@ npm run test:cov
 - `GET /products` - Listar produtos
 - `PUT /products/:id` - Atualizar produto
 - `DELETE /products/:id` - Deletar produto
+
+### Pedidos
+- `POST /order?userId={userId}` - Criar pedido (requer ID do usuário como query parameter)
+- `GET /order` - Listar pedidos
+- `PUT /order/:id` - Atualizar status do pedido
+- `DELETE /order/:id` - Deletar pedido
 
 ## 🗄️ Banco de Dados
 
