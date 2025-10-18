@@ -28,7 +28,7 @@ export class ProductService {
     if (!productExist) {
       throw new NotFoundException('Product not found!');
     }
-    Object.assign(productExist, newData);
+    Object.assign(productExist, newData as ProductEntity);
     return this.productRepository.save(productExist);
   }
 
