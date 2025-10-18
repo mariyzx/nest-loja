@@ -9,10 +9,10 @@ import { ProductOrderEntity } from './product-order.entity';
 import { OrderStatus } from './enum/OrderStatus.enum';
 import { UpdateOrderDto } from './dto/UpdateOrder.dto';
 import { OrderRepository } from './order.repository';
-import { UserRepository } from '../users/user.repository';
-import { ProductRepository } from '../products/product.repository';
-import { UserEntity } from '../users/user.entity';
-import { ProductEntity } from '../products/product.entity';
+import { UserRepository } from '../../modules/users/user.repository';
+import { ProductRepository } from '../../modules/products/product.repository';
+import { UserEntity } from '../../modules/users/user.entity';
+import { ProductEntity } from '../../modules/products/product.entity';
 
 @Injectable()
 export class OrderService {

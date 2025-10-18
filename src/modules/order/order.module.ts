@@ -3,11 +3,11 @@ import { OrderService } from './order.service';
 import { OrderController } from './order.controller';
 import { OrderEntity } from './order.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserEntity } from '../users/user.entity';
-import { ProductEntity } from '../products/product.entity';
+import { UserEntity } from '../../modules/users/user.entity';
+import { ProductEntity } from '../../modules/products/product.entity';
 import { OrderRepository } from './order.repository';
-import { UserRepository } from '../users/user.repository';
-import { ProductRepository } from '../products/product.repository';
+import { UserRepository } from '../../modules/users/user.repository';
+import { ProductRepository } from '../../modules/products/product.repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([OrderEntity, UserEntity, ProductEntity])],

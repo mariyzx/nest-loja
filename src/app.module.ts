@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ProductsModule } from './products/product.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostgresConfigService } from './config/postgres.config.service';
 import { ConfigModule } from '@nestjs/config';
-import { UserModule } from './users/user.module';
-import { OrderModule } from './order/order.module';
+import { OrderModule } from './modules/order/order.module';
 import { GlobalExceptionFilter } from './filters/global-exception';
+import { UserModule } from './modules/users/user.module';
+import { ProductsModule } from './modules/products/product.module';
 
 @Module({
   imports: [
