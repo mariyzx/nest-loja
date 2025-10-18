@@ -28,7 +28,6 @@ export class ProductEntity {
   @Column({
     name: 'description',
     type: 'varchar',
-    length: 1000,
     nullable: false,
   })
   description: string;

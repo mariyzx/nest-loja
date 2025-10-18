@@ -1,9 +1,9 @@
-import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ProductEntity } from './product.entity';
 
 @Entity('product_images')
 export class ProductImageEntity {
-  @PrimaryColumn('uuid')
+  @PrimaryGeneratedColumn('uuid')
   id: string;
   @Column({ name: 'url', type: 'varchar', length: 200, nullable: false })
   url: string;

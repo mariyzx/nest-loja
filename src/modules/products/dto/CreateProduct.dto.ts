@@ -47,9 +47,6 @@ export class CreateProductDTO {
   availableQuantity: number;
 
   @IsNotEmpty({ message: 'Description cannot be empty' })
-  @MinLength(1000, {
-    message: 'Description must have at least 1000 characters',
-  })
   description: string;
 
   @IsArray({ message: 'Specifications must be an array' })
@@ -66,7 +63,4 @@ export class CreateProductDTO {
 
   @IsNotEmpty({ message: 'Category cannot be empty' })
   category: string;
-
-  createdAt: string;
-  updatedAt: string;
 }
