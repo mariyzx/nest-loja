@@ -5,9 +5,9 @@ import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { UserEntity } from '../../src/users/user.entity';
 import { ProductEntity } from '../../src/products/product.entity';
-import { OrderEntity } from '../../src/order/order.entity';
-import { OrderStatus } from '../../src/order/enum/OrderStatus.enum';
-import { OrderRepository } from '../../src/order/order.repository';
+import { OrderEntity } from '../../src/modules/order/order.entity';
+import { OrderStatus } from '../../src/modules/order/enum/OrderStatus.enum';
+import { OrderRepository } from '../../src/modules/order/order.repository';
 import { UserRepository } from '../../src/users/user.repository';
 import { ProductRepository } from '../../src/products/product.repository';
 

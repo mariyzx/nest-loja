@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { OrderController } from '../../src/order/order.controller';
-import { OrderService } from '../../src/order/order.service';
-import { CreateOrderDto } from '../../src/order/dto/CreateOrder.dto';
-import { UpdateOrderDto } from '../../src/order/dto/UpdateOrder.dto';
-import { OrderStatus } from '../../src/order/enum/OrderStatus.enum';
-import { OrderEntity } from '../../src/order/order.entity';
+import { OrderController } from '../../src/modules/order/order.controller';
+import { OrderService } from '../../src/modules/order/order.service';
+import { CreateOrderDto } from '../../src/modules/order/dto/CreateOrder.dto';
+import { UpdateOrderDto } from '../../src/modules/order/dto/UpdateOrder.dto';
+import { OrderStatus } from '../../src/modules/order/enum/OrderStatus.enum';
+import { OrderEntity } from '../../src/modules/order/order.entity';
 import { UserEntity } from '../../src/users/user.entity';
 
 type OrderServiceMock = jest.Mocked<
