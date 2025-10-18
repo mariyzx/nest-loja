@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
-import { ProductRepository } from '../../src/products/product.repository';
+import { ProductRepository } from '../../src/modules/products/product.repository';
 
 describe('Products (e2e)', () => {
   let app: INestApplication;

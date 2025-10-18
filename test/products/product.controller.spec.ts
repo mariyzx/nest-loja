@@ -1,10 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ProductsController } from '../../src/products/product.controller';
-import { ProductService } from '../../src/products/product.service';
-import { CreateProductDTO } from '../../src/products/dto/CreateProduct.dto';
-import { UpdateProductDTO } from '../../src/products/dto/UpdateProduct';
-import { ProductEntity } from '../../src/products/product.entity';
-import { DeleteResult, UpdateResult } from 'typeorm';
+import { ProductsController } from '../../src/modules/products/product.controller';
+import { ProductService } from '../../src/modules/products/product.service';
+import { CreateProductDTO } from '../../src/modules/products/dto/CreateProduct.dto';
+import { UpdateProductDTO } from '../../src/modules/products/dto/UpdateProduct';
+import { ProductEntity } from '../../src/modules/products/product.entity';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mocked-uuid'),
@@ -169,7 +168,20 @@ describe('ProductsController', () => {
         description: 'new desc',
       } as UpdateProductDTO;
 
-      const updated: UpdateResult = { raw: {}, generatedMaps: [], affected: 1 };
+      const updated: ProductEntity = {
+        id: '123',
+        name: 'new name',
+        description: 'new desc',
+        value: 0,
+        availableQuantity: 0,
+        specifications: [],
+        images: [],
+        category: 'cat',
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-02T00:00:00Z',
+        deletedAt: '2024-01-03T00:00:00Z',
+        orders: [],
+      };
       service.update.mockResolvedValueOnce(updated);
 
       const result = await controller.update(id, newData);
@@ -185,7 +197,20 @@ describe('ProductsController', () => {
   describe('DELETE /products/:id (delete)', () => {
     it('should delete and return a payload with a message', async () => {
       const id = '999';
-      const deleted: DeleteResult = { raw: {}, affected: 1 };
+      const deleted: ProductEntity = {
+        id: '999',
+        name: 'deleted product',
+        description: 'deleted desc',
+        value: 0,
+        availableQuantity: 0,
+        specifications: [],
+        images: [],
+        category: 'cat',
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-02T00:00:00Z',
+        deletedAt: '2024-01-03T00:00:00Z',
+        orders: [],
+      };
       service.delete.mockResolvedValueOnce(deleted);
 
       const result = await controller.delete(id);

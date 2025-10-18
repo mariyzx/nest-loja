@@ -1,12 +1,12 @@
 import { OrderService } from '../../src/modules/order/order.service';
 import { OrderEntity } from '../../src/modules/order/order.entity';
-import { UserEntity } from '../../src/users/user.entity';
-import { ProductEntity } from '../../src/products/product.entity';
+import { UserEntity } from '../../src/modules/users/user.entity';
+import { ProductEntity } from '../../src/modules/products/product.entity';
 import { OrderStatus } from '../../src/modules/order/enum/OrderStatus.enum';
 import { CreateOrderDto } from '../../src/modules/order/dto/CreateOrder.dto';
 import { OrderRepository } from '../../src/modules/order/order.repository';
-import { UserRepository } from '../../src/users/user.repository';
-import { ProductRepository } from '../../src/products/product.repository';
+import { UserRepository } from '../../src/modules/users/user.repository';
+import { ProductRepository } from '../../src/modules/products/product.repository';
 
 describe('OrderService', () => {
   let service: OrderService;

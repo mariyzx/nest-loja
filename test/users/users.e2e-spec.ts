@@ -4,8 +4,8 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { UserEntity } from '../../src/users/user.entity';
-import { UserRepository } from '../../src/users/user.repository';
+import { UserEntity } from '../../src/modules/users/user.entity';
+import { UserRepository } from '../../src/modules/users/user.repository';
 
 describe('Users (e2e)', () => {
   let app: INestApplication;

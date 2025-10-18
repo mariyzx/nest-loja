@@ -1,8 +1,8 @@
-import { UserService } from '../../src/users/user.service';
-import { UserEntity } from '../../src/users/user.entity';
-import { ListUserDTO } from '../../src/users/dto/ListUser.dto';
-import { UpdateUserDTO } from '../../src/users/dto/UpdateUser.dto';
-import { UserRepository } from '../../src/users/user.repository';
+import { UserService } from '../../src/modules/users/user.service';
+import { UserEntity } from '../../src/modules/users/user.entity';
+import { ListUserDTO } from '../../src/modules/users/dto/ListUser.dto';
+import { UpdateUserDTO } from '../../src/modules/users/dto/UpdateUser.dto';
+import { UserRepository } from '../../src/modules/users/user.repository';
 
 describe('UserService', () => {
   let service: UserService;
