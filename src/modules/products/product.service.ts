@@ -18,6 +18,10 @@ export class ProductService {
     return await this.productRepository.findAll();
   }
 
+  async getProductById(id: string): Promise<ProductEntity | null> {
+    return await this.productRepository.findById(id);
+  }
+
   async update(id: string, newData: UpdateProductDTO): Promise<ProductEntity> {
     return await this.productRepository.update(
       id,

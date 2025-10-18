@@ -30,6 +30,11 @@ export class ProductsController {
     return this.productService.getProducts();
   }
 
+  @Get('/:id')
+  async getProduct(@Param('id') id: string) {
+    return this.productService.getProductById(id);
+  }
+
   @Put('/:id')
   async update(@Param('id') id: string, @Body() newData: UpdateProductDTO) {
     const updatedProduct = await this.productService.update(id, newData);
