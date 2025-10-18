@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { ListUserDTO } from './dto/ListUser.dto';
 import { UpdateUserDTO } from './dto/UpdateUser.dto';
 import { CreateUserDTO } from './dto/CreateUser.dto';
+import { NotFoundException } from '@nestjs/common';
 
 export class UserService {
   constructor(
@@ -30,18 +31,21 @@ export class UserService {
   }
 
   async update(id: string, userEntity: UpdateUserDTO) {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
     await this.userRepository.update(id, userEntity);
     return 'User updated succesfully!';
   }
 
   async delete(id: string) {
-    const userExist = await this.userRepository.findOne({ where: { id } });
-    if (!userExist) {
-      return null;
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found!');
     }
 
     await this.userRepository.delete(id);
-
-    return userExist;
+    return user;
   }
 }
