@@ -28,14 +28,14 @@ export class ProductsController {
   }
 
   @Get()
+  @UseInterceptors(CacheInterceptor)
   async getProducts() {
     return this.productService.getProducts();
   }
 
   @Get('/:id')
-  @UseInterceptors(CacheInterceptor) // roda um código antes e depois de um controller method
+  @UseInterceptors(CacheInterceptor)
   async getProduct(@Param('id') id: string) {
-    console.log('Fetching product with id:', id);
     return this.productService.getProductById(id);
   }
 
