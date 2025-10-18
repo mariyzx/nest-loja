@@ -44,4 +44,12 @@ export class ProductRepository implements IProductRepository {
     await this.ormRepository.delete(id);
     return product;
   }
+
+  async findByIds(ids: string[]): Promise<ProductEntity[]> {
+    return await this.ormRepository.findByIds(ids);
+  }
+
+  async save(product: ProductEntity): Promise<ProductEntity> {
+    return await this.ormRepository.save(product);
+  }
 }

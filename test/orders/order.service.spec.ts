@@ -1,24 +1,18 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { OrderService } from '../../src/order/order.service';
 import { OrderEntity } from '../../src/order/order.entity';
 import { UserEntity } from '../../src/users/user.entity';
 import { ProductEntity } from '../../src/products/product.entity';
 import { OrderStatus } from '../../src/order/enum/OrderStatus.enum';
 import { CreateOrderDto } from '../../src/order/dto/CreateOrder.dto';
-
-type OrderRepoMock = Pick<Repository<OrderEntity>, 'save' | 'findOne'>;
-
-type UserRepoMock = Pick<Repository<UserEntity>, 'findOneBy'>;
-
-type ProductRepoMock = Pick<Repository<ProductEntity>, 'findBy'>;
+import { OrderRepository } from '../../src/order/order.repository';
+import { UserRepository } from '../../src/users/user.repository';
+import { ProductRepository } from '../../src/products/product.repository';
 
 describe('OrderService', () => {
   let service: OrderService;
-  let orderRepository: jest.Mocked<OrderRepoMock>;
-  let userRepository: jest.Mocked<UserRepoMock>;
-  let productRepository: jest.Mocked<ProductRepoMock>;
+  let orderRepository: jest.Mocked<OrderRepository>;
+  let userRepository: jest.Mocked<UserRepository>;
+  let productRepository: jest.Mocked<ProductRepository>;
 
   const makeUser = (overrides?: Partial<UserEntity>): UserEntity => ({
     id: overrides?.id ?? 'user-1',
@@ -57,36 +51,50 @@ describe('OrderService', () => {
     productOrders: overrides?.productOrders ?? [],
   });
 
-  beforeEach(async () => {
-    const orderRepoMock: jest.Mocked<OrderRepoMock> = {
+  function orderRepoMockFactory(): jest.Mocked<OrderRepository> {
+    return Object.assign(Object.create(OrderRepository.prototype), {
+      create: jest.fn(),
+      findById: jest.fn(),
+      findByUserId: jest.fn(),
+      update: jest.fn(),
       save: jest.fn(),
-      findOne: jest.fn(),
-    };
+    }) as jest.Mocked<OrderRepository>;
+  }
 
-    const userRepoMock: jest.Mocked<UserRepoMock> = {
-      findOneBy: jest.fn(),
-    };
+  function userRepoMockFactory(): jest.Mocked<UserRepository> {
+    return Object.assign(Object.create(UserRepository.prototype), {
+      create: jest.fn(),
+      findAll: jest.fn(),
+      findById: jest.fn(),
+      findByEmail: jest.fn(),
+      existsWithEmail: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    }) as jest.Mocked<UserRepository>;
+  }
 
-    const productRepoMock: jest.Mocked<ProductRepoMock> = {
-      findBy: jest.fn(),
-    };
+  function productRepoMockFactory(): jest.Mocked<ProductRepository> {
+    return Object.assign(Object.create(ProductRepository.prototype), {
+      create: jest.fn(),
+      findAll: jest.fn(),
+      findById: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      findByIds: jest.fn(),
+      save: jest.fn(),
+    }) as jest.Mocked<ProductRepository>;
+  }
 
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        OrderService,
-        { provide: getRepositoryToken(OrderEntity), useValue: orderRepoMock },
-        { provide: getRepositoryToken(UserEntity), useValue: userRepoMock },
-        {
-          provide: getRepositoryToken(ProductEntity),
-          useValue: productRepoMock,
-        },
-      ],
-    }).compile();
+  beforeEach(() => {
+    orderRepository = orderRepoMockFactory();
+    userRepository = userRepoMockFactory();
+    productRepository = productRepoMockFactory();
 
-    service = module.get<OrderService>(OrderService);
-    orderRepository = orderRepoMock;
-    userRepository = userRepoMock;
-    productRepository = productRepoMock;
+    service = new OrderService(
+      orderRepository,
+      userRepository,
+      productRepository,
+    );
 
     jest.clearAllMocks();
   });
@@ -105,16 +113,16 @@ describe('OrderService', () => {
       const p1 = makeProduct({ id: 'product-1', value: 100 });
       const p2 = makeProduct({ id: 'product-2', value: 150 });
 
-      userRepository.findOneBy.mockResolvedValueOnce(user);
-      productRepository.findBy.mockResolvedValueOnce([p1, p2]);
+      userRepository.findById.mockResolvedValueOnce(user);
+      productRepository.findByIds.mockResolvedValueOnce([p1, p2]);
       orderRepository.save.mockResolvedValueOnce(
         makeOrder({ totalValue: 350, status: OrderStatus.PENDING }),
       );
 
       const result = await service.createOrder(userId, dto);
 
-      expect(userRepository.findOneBy).toHaveBeenCalledWith({ id: userId });
-      expect(productRepository.findBy).toHaveBeenCalled();
+      expect(userRepository.findById).toHaveBeenCalledWith(userId);
+      expect(productRepository.findByIds).toHaveBeenCalled();
       expect(orderRepository.save).toHaveBeenCalled();
       expect(result.totalValue).toBe(350);
       expect(result.status).toBe(OrderStatus.PENDING);
@@ -126,7 +134,7 @@ describe('OrderService', () => {
         orderProducts: [{ productId: 'p', quantity: 1 }],
       };
 
-      userRepository.findOneBy.mockResolvedValueOnce(null);
+      userRepository.findById.mockResolvedValueOnce(null);
 
       await expect(service.createOrder(userId, dto)).rejects.toThrow(
         'User not found!',
@@ -137,25 +145,24 @@ describe('OrderService', () => {
   describe('updateOrder', () => {
     it('should update existing order', async () => {
       const orderId = 'order-1';
-      const existing = makeOrder({ status: OrderStatus.PENDING });
       const updated = makeOrder({ status: OrderStatus.COMPLETED });
 
-      orderRepository.findOne.mockResolvedValueOnce(existing);
-      orderRepository.save.mockResolvedValueOnce(updated);
+      orderRepository.update.mockResolvedValueOnce(updated);
 
       const result = await service.updateOrder(orderId, {
         status: OrderStatus.COMPLETED,
       });
 
-      expect(orderRepository.findOne).toHaveBeenCalledWith({
-        where: { id: orderId },
-        relations: ['productOrders', 'productOrders.product'],
+      expect(orderRepository.update).toHaveBeenCalledWith(orderId, {
+        status: OrderStatus.COMPLETED,
       });
       expect(result.status).toBe(OrderStatus.COMPLETED);
     });
 
     it('should throw when order not found', async () => {
-      orderRepository.findOne.mockResolvedValueOnce(null);
+      orderRepository.update.mockRejectedValueOnce(
+        new Error('Order not found'),
+      );
 
       await expect(
         service.updateOrder('missing', { status: OrderStatus.CANCELED }),

@@ -3,28 +3,26 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { OrderEntity } from './order.entity';
-import { In, Repository } from 'typeorm';
-import { UserEntity } from '../users/user.entity';
 import { CreateOrderDto, OrderProductDTO } from './dto/CreateOrder.dto';
 import { ProductOrderEntity } from './product-order.entity';
-import { ProductEntity } from '../products/product.entity';
 import { OrderStatus } from './enum/OrderStatus.enum';
 import { UpdateOrderDto } from './dto/UpdateOrder.dto';
+import { OrderRepository } from './order.repository';
+import { UserRepository } from '../users/user.repository';
+import { ProductRepository } from '../products/product.repository';
+import { UserEntity } from '../users/user.entity';
+import { ProductEntity } from '../products/product.entity';
 
 @Injectable()
 export class OrderService {
   constructor(
-    @InjectRepository(OrderEntity)
-    private readonly orderRepository: Repository<OrderEntity>,
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
-    @InjectRepository(ProductEntity)
-    private readonly productRepository: Repository<ProductEntity>,
+    private readonly orderRepository: OrderRepository,
+    private readonly userRepository: UserRepository,
+    private readonly productRepository: ProductRepository,
   ) {}
   private async findUser(id: string): Promise<UserEntity> {
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.findById(id);
 
     if (user === null) {
       throw new NotFoundException('User not found!');
@@ -64,9 +62,7 @@ export class OrderService {
 
     const orderEntity = new OrderEntity();
     const productsIds = orderData.orderProducts.map((item) => item.productId);
-    const relatedProducts = await this.productRepository.findBy({
-      id: In(productsIds),
-    });
+    const relatedProducts = await this.productRepository.findByIds(productsIds);
     this.handleOrder(orderData, relatedProducts);
     const itemEntity = orderData.orderProducts.map((item: OrderProductDTO) => {
       const productOrderEntity = new ProductOrderEntity();
@@ -97,18 +93,7 @@ export class OrderService {
     orderId: string,
     orderData: Partial<UpdateOrderDto>,
   ): Promise<OrderEntity> {
-    const order = await this.orderRepository.findOne({
-      where: { id: orderId },
-      relations: ['productOrders', 'productOrders.product'],
-    });
-
-    if (!order) {
-      throw new NotFoundException('Order not found');
-    }
-
-    Object.assign(order, orderData);
-
-    return this.orderRepository.save(order);
+    return await this.orderRepository.update(orderId, orderData);
   }
 
   async getUserOrders(userId: string): Promise<OrderEntity[]> {
@@ -118,11 +103,6 @@ export class OrderService {
       throw new NotFoundException('User not found!');
     }
 
-    return this.orderRepository.find({
-      where: { user: { id: user.id } },
-      relations: {
-        user: true,
-      },
-    });
+    return await this.orderRepository.findByUserId(user.id);
   }
 }

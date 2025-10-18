@@ -3,39 +3,43 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { OrderEntity } from '../../src/order/order.entity';
 import { UserEntity } from '../../src/users/user.entity';
 import { ProductEntity } from '../../src/products/product.entity';
+import { OrderEntity } from '../../src/order/order.entity';
 import { OrderStatus } from '../../src/order/enum/OrderStatus.enum';
+import { OrderRepository } from '../../src/order/order.repository';
+import { UserRepository } from '../../src/users/user.repository';
+import { ProductRepository } from '../../src/products/product.repository';
 
 describe('Orders (e2e)', () => {
   let app: INestApplication;
 
   const mockOrderRepository = {
+    create: jest.fn(),
+    findById: jest.fn(),
+    findByUserId: jest.fn(),
+    update: jest.fn(),
     save: jest.fn(),
-    find: jest.fn(),
-    findOne: jest.fn(),
-    findOneBy: jest.fn(),
   };
 
   const mockUserRepository = {
-    findOneBy: jest.fn(),
+    findById: jest.fn(),
   };
 
   const mockProductRepository = {
-    findBy: jest.fn(),
+    findByIds: jest.fn(),
+    save: jest.fn(),
   };
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
-      .overrideProvider(getRepositoryToken(OrderEntity))
+      .overrideProvider(OrderRepository)
       .useValue(mockOrderRepository)
-      .overrideProvider(getRepositoryToken(UserEntity))
+      .overrideProvider(UserRepository)
       .useValue(mockUserRepository)
-      .overrideProvider(getRepositoryToken(ProductEntity))
+      .overrideProvider(ProductRepository)
       .useValue(mockProductRepository)
       .compile();
 
@@ -80,8 +84,8 @@ describe('Orders (e2e)', () => {
         productOrders: [{ id: 'po-1', quantity: 2, sellValue: 100, product }],
       } as unknown as OrderEntity;
 
-      mockUserRepository.findOneBy.mockResolvedValueOnce(user);
-      mockProductRepository.findBy.mockResolvedValueOnce([product]);
+      mockUserRepository.findById.mockResolvedValueOnce(user);
+      mockProductRepository.findByIds.mockResolvedValueOnce([product]);
       mockOrderRepository.save.mockResolvedValueOnce(expectedOrder);
 
       const response = await request(app.getHttpServer())
@@ -128,8 +132,8 @@ describe('Orders (e2e)', () => {
         productOrders: [],
       } as unknown as OrderEntity;
 
-      mockOrderRepository.findOne.mockResolvedValueOnce(existingOrder);
-      mockOrderRepository.save.mockResolvedValueOnce(updatedOrder);
+      mockOrderRepository.findById.mockResolvedValueOnce(existingOrder);
+      mockOrderRepository.update.mockResolvedValueOnce(updatedOrder);
 
       const response = await request(app.getHttpServer())
         .patch(`/order/${orderId}`)
