@@ -23,6 +23,7 @@ describe('UserService', () => {
     createdAt: overrides?.createdAt ?? '2024-01-01T00:00:00Z',
     updatedAt: overrides?.updatedAt ?? '2024-01-02T00:00:00Z',
     deletedAt: overrides?.deletedAt ?? '2024-01-03T00:00:00Z',
+    orders: overrides?.orders ?? [],
   });
 
   const repoMockFactory = (): jest.Mocked<RepoMock> => ({
@@ -105,6 +106,11 @@ describe('UserService', () => {
         generatedMaps: [],
         affected: 1,
       };
+      repository.findOne.mockResolvedValueOnce({
+        id,
+        ...payload,
+      } as UserEntity);
+
       repository.update.mockResolvedValueOnce(updateResult);
 
       const result = await service.update(id, payload);
@@ -129,15 +135,14 @@ describe('UserService', () => {
       expect(result).toEqual(entity);
     });
 
-    it('should return null when user does not exist', async () => {
+    it('should return NotFoundException when user does not exist', async () => {
       const id = 'missing';
       repository.findOne.mockResolvedValueOnce(null);
 
-      const result = await service.delete(id);
+      await expect(service.delete(id)).rejects.toThrow('User not found!');
 
       expect(repository.findOne).toHaveBeenCalledWith({ where: { id } });
       expect(repository.delete).not.toHaveBeenCalled();
-      expect(result).toBeNull();
     });
   });
 });

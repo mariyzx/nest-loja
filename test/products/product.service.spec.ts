@@ -135,15 +135,14 @@ describe('ProductService', () => {
       expect(result).toEqual(deleteResult);
     });
 
-    it('should return null when the product does not exist', async () => {
+    it('should return NotFoundException when the product does not exist', async () => {
       const id = 'does-not-exist';
       repository.findOneBy.mockResolvedValueOnce(null);
 
-      const result = await service.delete(id);
+      await expect(service.delete(id)).rejects.toThrow('Product not found');
 
       expect(repository.findOneBy).toHaveBeenCalledWith({ id });
       expect(repository.delete).not.toHaveBeenCalled();
-      expect(result).toBeNull();
     });
   });
 });
