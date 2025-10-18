@@ -1,17 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, UpdateResult, DeleteResult } from 'typeorm';
 import { ProductService } from '../../src/products/product.service';
 import { ProductEntity } from '../../src/products/product.entity';
-
-type RepoMock = Pick<
-  Repository<ProductEntity>,
-  'save' | 'find' | 'findOneBy' | 'update' | 'delete'
->;
+import { ProductRepository } from '../../src/products/product.repository';
 
 describe('ProductService', () => {
   let service: ProductService;
-  let repository: jest.Mocked<RepoMock>;
+  let repository: jest.Mocked<ProductRepository>;
 
   const makeEntity = (overrides?: Partial<ProductEntity>): ProductEntity => ({
     id: overrides?.id ?? 'p-1',
@@ -28,28 +22,19 @@ describe('ProductService', () => {
     orders: overrides?.orders ?? [],
   });
 
-  const repoMockFactory = (): jest.Mocked<RepoMock> => ({
-    save: jest.fn(),
-    find: jest.fn(),
-    findOneBy: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-  });
+  function repoMockFactory(): jest.Mocked<ProductRepository> {
+    return Object.assign(Object.create(ProductRepository.prototype), {
+      create: jest.fn(),
+      findAll: jest.fn(),
+      findById: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    }) as jest.Mocked<ProductRepository>;
+  }
 
-  beforeEach(async () => {
+  beforeEach(() => {
     repository = repoMockFactory();
-
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ProductService,
-        {
-          provide: getRepositoryToken(ProductEntity),
-          useValue: repository,
-        },
-      ],
-    }).compile();
-
-    service = module.get<ProductService>(ProductService);
+    service = new ProductService(repository);
     jest.clearAllMocks();
   });
 
@@ -60,11 +45,11 @@ describe('ProductService', () => {
   describe('create', () => {
     it('should save a new product', async () => {
       const entity = makeEntity();
-      repository.save.mockResolvedValueOnce(entity);
+      repository.create.mockResolvedValueOnce(entity);
 
       const result = await service.create(entity);
 
-      expect(repository.save).toHaveBeenCalledWith(
+      expect(repository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           name: entity.name,
           value: entity.value,
@@ -80,11 +65,11 @@ describe('ProductService', () => {
   describe('getProducts', () => {
     it('should return the list of products', async () => {
       const list = [makeEntity({ id: 'p-1' }), makeEntity({ id: 'p-2' })];
-      repository.find.mockResolvedValueOnce(list);
+      repository.findAll.mockResolvedValueOnce(list);
 
       const result = await service.getProducts();
 
-      expect(repository.find).toHaveBeenCalledTimes(1);
+      expect(repository.findAll).toHaveBeenCalledTimes(1);
       expect(result).toEqual(list);
     });
   });
@@ -93,56 +78,47 @@ describe('ProductService', () => {
     it('should update when the product exists', async () => {
       const id = 'p-1';
       const payload: Partial<ProductEntity> = { name: 'Novo nome' };
-      repository.findOneBy.mockResolvedValueOnce(makeEntity({ id }));
-      const updateResult: UpdateResult = {
-        raw: {},
-        generatedMaps: [],
-        affected: 1,
-      };
-      repository.update.mockResolvedValueOnce(updateResult);
+      const updatedProduct = makeEntity({ id, name: 'Novo nome' });
+      repository.update.mockResolvedValueOnce(updatedProduct);
 
-      const result = await service.update(id, payload);
+      const result = await service.update(id, payload as any);
 
-      expect(repository.findOneBy).toHaveBeenCalledWith({ id });
-      expect(repository.update).toHaveBeenCalledWith(id, payload);
-      expect(result).toEqual(updateResult);
+      expect(repository.update).toHaveBeenCalledWith(id, payload as any);
+      expect(result).toEqual(updatedProduct);
     });
 
     it('should return NotFoundException when the product does not exist', async () => {
       const id = 'inexistente';
-      repository.findOneBy.mockResolvedValueOnce(null);
+      repository.update.mockRejectedValueOnce(new Error('Product not found!'));
 
-      await expect(service.update(id, { name: 'Nome' })).rejects.toThrow(
+      await expect(service.update(id, { name: 'Nome' } as any)).rejects.toThrow(
         'Product not found',
       );
 
-      expect(repository.findOneBy).toHaveBeenCalledWith({ id });
-      expect(repository.update).not.toHaveBeenCalled();
+      expect(repository.update).toHaveBeenCalledWith(id, {
+        name: 'Nome',
+      } as any);
     });
   });
 
   describe('delete', () => {
     it('should delete when the product exists', async () => {
       const id = 'p-1';
-      repository.findOneBy.mockResolvedValueOnce(makeEntity({ id }));
-      const deleteResult: DeleteResult = { raw: {}, affected: 1 };
-      repository.delete.mockResolvedValueOnce(deleteResult);
+      const deletedProduct = makeEntity({ id });
+      repository.delete.mockResolvedValueOnce(deletedProduct);
 
       const result = await service.delete(id);
 
-      expect(repository.findOneBy).toHaveBeenCalledWith({ id });
       expect(repository.delete).toHaveBeenCalledWith(id);
-      expect(result).toEqual(deleteResult);
+      expect(result).toEqual(deletedProduct);
     });
 
     it('should return NotFoundException when the product does not exist', async () => {
       const id = 'does-not-exist';
-      repository.findOneBy.mockResolvedValueOnce(null);
+      repository.delete.mockRejectedValueOnce(new Error('Product not found!'));
 
       await expect(service.delete(id)).rejects.toThrow('Product not found');
-
-      expect(repository.findOneBy).toHaveBeenCalledWith({ id });
-      expect(repository.delete).not.toHaveBeenCalled();
+      expect(repository.delete).toHaveBeenCalledWith(id);
     });
   });
 });

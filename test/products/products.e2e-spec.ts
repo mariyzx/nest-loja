@@ -1,19 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import {
+  INestApplication,
+  ValidationPipe,
+  NotFoundException,
+} from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { ProductEntity } from '../../src/products/product.entity';
+import { ProductRepository } from '../../src/products/product.repository';
 
 describe('Products (e2e)', () => {
   let app: INestApplication;
 
   const mockProductRepository = {
-    save: jest.fn(),
-    find: jest.fn(),
-    findOne: jest.fn(),
-    findOneBy: jest.fn(),
+    create: jest.fn(),
+    findAll: jest.fn(),
+    findById: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
   };
@@ -22,7 +24,7 @@ describe('Products (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
-      .overrideProvider(getRepositoryToken(ProductEntity))
+      .overrideProvider(ProductRepository)
       .useValue(mockProductRepository)
       .compile();
 
@@ -56,7 +58,7 @@ describe('Products (e2e)', () => {
         },
       ];
 
-      mockProductRepository.find.mockResolvedValue(products);
+      mockProductRepository.findAll.mockResolvedValue(products);
 
       const response = await request(app.getHttpServer())
         .get('/products')
@@ -76,7 +78,7 @@ describe('Products (e2e)', () => {
         },
       ]);
 
-      expect(mockProductRepository.find).toHaveBeenCalled();
+      expect(mockProductRepository.findAll).toHaveBeenCalled();
     });
   });
 
@@ -109,9 +111,8 @@ describe('Products (e2e)', () => {
         updatedAt: '2023-01-01T01:00:00.000Z',
       };
 
-      mockProductRepository.findOneBy.mockResolvedValue(existingProduct);
-      mockProductRepository.update.mockResolvedValue({ affected: 1 });
-      mockProductRepository.save.mockResolvedValue(updatedProduct);
+      mockProductRepository.findById.mockResolvedValue(existingProduct);
+      mockProductRepository.update.mockResolvedValue(updatedProduct);
 
       const response = await request(app.getHttpServer())
         .put('/products/product-id-123')
@@ -123,9 +124,10 @@ describe('Products (e2e)', () => {
         produto: updatedProduct,
       });
 
-      expect(mockProductRepository.findOneBy).toHaveBeenCalledWith({
-        id: 'product-id-123',
-      });
+      expect(mockProductRepository.update).toHaveBeenCalledWith(
+        'product-id-123',
+        updateProductDto,
+      );
     });
 
     it('should return 404 when product not found', async () => {
@@ -133,7 +135,9 @@ describe('Products (e2e)', () => {
         name: 'Updated Product',
       };
 
-      mockProductRepository.findOneBy.mockResolvedValue(null);
+      mockProductRepository.update.mockRejectedValue(
+        new NotFoundException('Product not found!'),
+      );
 
       const response = await request(app.getHttpServer())
         .put('/products/non-existent-id')
@@ -147,9 +151,10 @@ describe('Products (e2e)', () => {
         }),
       );
 
-      expect(mockProductRepository.findOneBy).toHaveBeenCalledWith({
-        id: 'non-existent-id',
-      });
+      expect(mockProductRepository.update).toHaveBeenCalledWith(
+        'non-existent-id',
+        updateProductDto,
+      );
     });
   });
 
@@ -161,8 +166,8 @@ describe('Products (e2e)', () => {
         value: 100,
       };
 
-      mockProductRepository.findOneBy.mockResolvedValue(existingProduct);
-      mockProductRepository.delete.mockResolvedValue({ affected: 1 });
+      mockProductRepository.findById.mockResolvedValue(existingProduct);
+      mockProductRepository.delete.mockResolvedValue(existingProduct);
 
       const response = await request(app.getHttpServer())
         .delete('/products/product-id-123')
@@ -170,7 +175,7 @@ describe('Products (e2e)', () => {
 
       expect(response.body).toEqual({
         mensagem: 'Product deleted successfully!',
-        produto: { affected: 1 },
+        produto: existingProduct,
       });
 
       expect(mockProductRepository.delete).toHaveBeenCalledWith(
@@ -179,7 +184,9 @@ describe('Products (e2e)', () => {
     });
 
     it('should return 404 when trying to delete non-existent product', async () => {
-      mockProductRepository.findOneBy.mockResolvedValue(null);
+      mockProductRepository.delete.mockRejectedValue(
+        new NotFoundException('Product not found!'),
+      );
 
       const response = await request(app.getHttpServer())
         .delete('/products/non-existent-id')
@@ -191,10 +198,9 @@ describe('Products (e2e)', () => {
           message: 'Product not found!',
         }),
       );
-      expect(mockProductRepository.findOneBy).toHaveBeenCalledWith({
-        id: 'non-existent-id',
-      });
-      expect(mockProductRepository.delete).not.toHaveBeenCalled();
+      expect(mockProductRepository.delete).toHaveBeenCalledWith(
+        'non-existent-id',
+      );
     });
   });
 });

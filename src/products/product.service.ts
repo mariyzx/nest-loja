@@ -1,43 +1,31 @@
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable } from '@nestjs/common';
 import { ProductEntity } from './product.entity';
-import { Repository } from 'typeorm';
-import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDTO } from './dto/CreateProduct.dto';
+import { UpdateProductDTO } from './dto/UpdateProduct';
+import { ProductRepository } from './product.repository';
 
 @Injectable()
 export class ProductService {
-  constructor(
-    @InjectRepository(ProductEntity)
-    private readonly productRepository: Repository<ProductEntity>,
-  ) {}
+  constructor(private readonly productRepository: ProductRepository) {}
 
-  async create(productData: CreateProductDTO) {
+  async create(productData: CreateProductDTO): Promise<ProductEntity> {
     const productEntity = new ProductEntity();
-
-    Object.assign(productEntity, productData as ProductEntity);
-
-    return this.productRepository.save(productEntity);
+    Object.assign(productEntity, productData);
+    return await this.productRepository.create(productEntity);
   }
 
-  async getProducts() {
-    return this.productRepository.find();
+  async getProducts(): Promise<ProductEntity[]> {
+    return await this.productRepository.findAll();
   }
 
-  async update(id: string, newData: Partial<ProductEntity>) {
-    const productExist = await this.productRepository.findOneBy({ id });
-    if (!productExist) {
-      throw new NotFoundException('Product not found!');
-    }
-    Object.assign(productExist, newData as ProductEntity);
-    return this.productRepository.save(productExist);
+  async update(id: string, newData: UpdateProductDTO): Promise<ProductEntity> {
+    return await this.productRepository.update(
+      id,
+      newData as Partial<ProductEntity>,
+    );
   }
 
-  async delete(id: string) {
-    const productExist = await this.productRepository.findOneBy({ id });
-    if (!productExist) {
-      throw new NotFoundException('Product not found!');
-    }
-    const deletedProduct = await this.productRepository.delete(id);
-    return deletedProduct;
+  async delete(id: string): Promise<ProductEntity> {
+    return await this.productRepository.delete(id);
   }
 }
