@@ -11,20 +11,18 @@ jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mocked-uuid'),
 }));
 
-type UserServiceMock = jest.Mocked<
-  Pick<UserService, 'create' | 'getUsers' | 'update' | 'delete'>
->;
-
 describe('UserController', () => {
   let controller: UserController;
-  let service: UserServiceMock;
+  let service: jest.Mocked<UserService>;
 
-  const mockUserService: UserServiceMock = {
-    create: jest.fn(),
-    getUsers: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-  };
+  function serviceMockFactory(): jest.Mocked<UserService> {
+    return Object.assign(Object.create(UserService.prototype), {
+      create: jest.fn(),
+      getUsers: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    }) as jest.Mocked<UserService>;
+  }
 
   const makeEntity = (overrides?: Partial<UserEntity>): UserEntity => ({
     id: overrides?.id ?? 'u-1',
@@ -34,15 +32,17 @@ describe('UserController', () => {
     createdAt: overrides?.createdAt ?? '2024-01-01T00:00:00Z',
     updatedAt: overrides?.updatedAt ?? '2024-01-02T00:00:00Z',
     deletedAt: overrides?.deletedAt ?? '2024-01-03T00:00:00Z',
+    orders: [],
   });
 
   beforeEach(async () => {
+    service = serviceMockFactory();
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UserController],
       providers: [
         {
           provide: UserService,
-          useValue: mockUserService,
+          useValue: service,
         },
         {
           provide: UserRepository,
@@ -52,8 +52,6 @@ describe('UserController', () => {
     }).compile();
 
     controller = module.get<UserController>(UserController);
-    service = mockUserService;
-
     jest.clearAllMocks();
   });
 

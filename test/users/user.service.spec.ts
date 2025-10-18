@@ -1,19 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { UserService } from '../../src/users/user.service';
 import { UserEntity } from '../../src/users/user.entity';
 import { ListUserDTO } from '../../src/users/dto/ListUser.dto';
 import { UpdateUserDTO } from '../../src/users/dto/UpdateUser.dto';
-
-type RepoMock = Pick<
-  Repository<UserEntity>,
-  'save' | 'find' | 'findOne' | 'update' | 'delete'
->;
+import { UserRepository } from '../../src/users/user.repository';
 
 describe('UserService', () => {
   let service: UserService;
-  let repository: jest.Mocked<RepoMock>;
+  let repository: jest.Mocked<UserRepository>;
 
   const makeEntity = (overrides?: Partial<UserEntity>): UserEntity => ({
     id: overrides?.id ?? 'u-1',
@@ -26,28 +19,21 @@ describe('UserService', () => {
     orders: overrides?.orders ?? [],
   });
 
-  const repoMockFactory = (): jest.Mocked<RepoMock> => ({
-    save: jest.fn(),
-    find: jest.fn(),
-    findOne: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-  });
+  function repoMockFactory(): jest.Mocked<UserRepository> {
+    return Object.assign(Object.create(UserRepository.prototype), {
+      create: jest.fn(),
+      findAll: jest.fn(),
+      findById: jest.fn(),
+      findByEmail: jest.fn(),
+      existsWithEmail: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    }) as jest.Mocked<UserRepository>;
+  }
 
-  beforeEach(async () => {
+  beforeEach(() => {
     repository = repoMockFactory();
-
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        UserService,
-        {
-          provide: getRepositoryToken(UserEntity),
-          useValue: repository,
-        },
-      ],
-    }).compile();
-
-    service = module.get<UserService>(UserService);
+    service = new UserService(repository);
     jest.clearAllMocks();
   });
 
@@ -63,11 +49,11 @@ describe('UserService', () => {
         password: 'password123',
       };
       const savedUser = makeEntity(userData);
-      repository.save.mockResolvedValueOnce(savedUser);
+      repository.create.mockResolvedValueOnce(savedUser);
 
       const result = await service.create(userData);
 
-      expect(repository.save).toHaveBeenCalledWith(
+      expect(repository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'John Doe',
           email: 'john@example.com',
@@ -84,11 +70,11 @@ describe('UserService', () => {
         makeEntity({ id: '1', name: 'A' }),
         makeEntity({ id: '2', name: 'B' }),
       ];
-      repository.find.mockResolvedValueOnce(entities);
+      repository.findAll.mockResolvedValueOnce(entities);
 
       const result = await service.getUsers();
 
-      expect(repository.find).toHaveBeenCalledTimes(1);
+      expect(repository.findAll).toHaveBeenCalledTimes(1);
       expect(result).toEqual([
         new ListUserDTO('1', 'A'),
         new ListUserDTO('2', 'B'),
@@ -97,26 +83,16 @@ describe('UserService', () => {
   });
 
   describe('update', () => {
-    it('should update and return success message', async () => {
+    it('should update and return the updated entity', async () => {
       const id = 'u-1';
       const payload: UpdateUserDTO = { name: 'New Name' } as UpdateUserDTO;
-
-      const updateResult: UpdateResult = {
-        raw: {},
-        generatedMaps: [],
-        affected: 1,
-      };
-      repository.findOne.mockResolvedValueOnce({
-        id,
-        ...payload,
-      } as UserEntity);
-
-      repository.update.mockResolvedValueOnce(updateResult);
+      const updatedUser = makeEntity({ id, name: 'New Name' });
+      repository.update.mockResolvedValueOnce(updatedUser);
 
       const result = await service.update(id, payload);
 
       expect(repository.update).toHaveBeenCalledWith(id, payload);
-      expect(result).toBe('User updated succesfully!');
+      expect(result).toEqual(updatedUser);
     });
   });
 
@@ -124,25 +100,20 @@ describe('UserService', () => {
     it('should delete and return the removed entity when exists', async () => {
       const id = 'u-1';
       const entity = makeEntity({ id, name: 'Jane' });
-      repository.findOne.mockResolvedValueOnce(entity);
-      const deleteResult: DeleteResult = { raw: {}, affected: 1 };
-      repository.delete.mockResolvedValueOnce(deleteResult);
+      repository.delete.mockResolvedValueOnce(entity);
 
       const result = await service.delete(id);
 
-      expect(repository.findOne).toHaveBeenCalledWith({ where: { id } });
       expect(repository.delete).toHaveBeenCalledWith(id);
       expect(result).toEqual(entity);
     });
 
-    it('should return NotFoundException when user does not exist', async () => {
+    it('should throw NotFoundException when user does not exist', async () => {
       const id = 'missing';
-      repository.findOne.mockResolvedValueOnce(null);
+      repository.delete.mockRejectedValueOnce(new Error('User not found!'));
 
       await expect(service.delete(id)).rejects.toThrow('User not found!');
-
-      expect(repository.findOne).toHaveBeenCalledWith({ where: { id } });
-      expect(repository.delete).not.toHaveBeenCalled();
+      expect(repository.delete).toHaveBeenCalledWith(id);
     });
   });
 });

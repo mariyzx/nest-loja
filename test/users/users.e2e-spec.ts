@@ -11,12 +11,13 @@ describe('Users (e2e)', () => {
   let app: INestApplication;
 
   const mockUserRepository = {
-    save: jest.fn(),
-    find: jest.fn(),
-    findOne: jest.fn(),
+    create: jest.fn(),
+    findAll: jest.fn(),
+    findById: jest.fn(),
+    findByEmail: jest.fn(),
     existsWithEmail: jest.fn(),
-    delete: jest.fn(),
     update: jest.fn(),
+    delete: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -54,7 +55,7 @@ describe('Users (e2e)', () => {
         },
       ];
 
-      mockUserRepository.find.mockResolvedValue(users);
+      mockUserRepository.findAll.mockResolvedValue(users);
 
       const response = await request(app.getHttpServer())
         .get('/users')
@@ -67,7 +68,7 @@ describe('Users (e2e)', () => {
         },
       ]);
 
-      expect(mockUserRepository.find).toHaveBeenCalled();
+      expect(mockUserRepository.findAll).toHaveBeenCalled();
     });
   });
 
@@ -77,7 +78,7 @@ describe('Users (e2e)', () => {
         name: 'João Silva Updated',
       };
 
-      mockUserRepository.update.mockResolvedValue({ affected: 1 });
+      mockUserRepository.update.mockResolvedValue('User updated succesfully!');
 
       const response = await request(app.getHttpServer())
         .put('/users/user-id-123')
@@ -100,7 +101,7 @@ describe('Users (e2e)', () => {
         name: 'João Silva Updated',
       };
 
-      mockUserRepository.update.mockRejectedValue(new Error('User not found'));
+      mockUserRepository.update.mockRejectedValue(new Error('User not found!'));
 
       await request(app.getHttpServer())
         .put('/users/non-existent-id')
@@ -122,8 +123,8 @@ describe('Users (e2e)', () => {
         email: 'joao@teste.com',
       };
 
-      mockUserRepository.findOne.mockResolvedValue(existingUser);
-      mockUserRepository.delete.mockResolvedValue({ affected: 1 });
+      mockUserRepository.findById.mockResolvedValue(existingUser);
+      mockUserRepository.delete.mockResolvedValue(existingUser);
 
       const response = await request(app.getHttpServer())
         .delete('/users/user-id-123')
@@ -141,16 +142,14 @@ describe('Users (e2e)', () => {
     });
 
     it('should return 404 when trying to delete non-existent user', async () => {
-      mockUserRepository.findOne.mockResolvedValue(null);
+      mockUserRepository.findById.mockResolvedValue(null);
+      mockUserRepository.delete.mockRejectedValue(new Error('User not found!'));
 
       await request(app.getHttpServer())
         .delete('/users/non-existent-id')
         .expect(500);
 
-      expect(mockUserRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 'non-existent-id' },
-      });
-      expect(mockUserRepository.delete).not.toHaveBeenCalled();
+      expect(mockUserRepository.delete).toHaveBeenCalledWith('non-existent-id');
     });
   });
 });

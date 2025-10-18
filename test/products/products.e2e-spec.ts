@@ -120,7 +120,7 @@ describe('Products (e2e)', () => {
 
       expect(response.body).toEqual({
         mensagem: 'Product updated successfully!',
-        produto: { affected: 1 },
+        produto: updatedProduct,
       });
 
       expect(mockProductRepository.findOneBy).toHaveBeenCalledWith({
@@ -178,18 +178,19 @@ describe('Products (e2e)', () => {
       );
     });
 
-    it('should return 200 with null when trying to delete non-existent product', async () => {
+    it('should return 404 when trying to delete non-existent product', async () => {
       mockProductRepository.findOneBy.mockResolvedValue(null);
 
       const response = await request(app.getHttpServer())
         .delete('/products/non-existent-id')
-        .expect(200);
+        .expect(404);
 
-      expect(response.body).toEqual({
-        produto: null,
-        mensagem: 'Product deleted successfully!',
-      });
-
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          statusCode: 404,
+          message: 'Product not found!',
+        }),
+      );
       expect(mockProductRepository.findOneBy).toHaveBeenCalledWith({
         id: 'non-existent-id',
       });
