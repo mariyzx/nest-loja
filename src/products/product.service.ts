@@ -14,15 +14,7 @@ export class ProductService {
   async create(productData: CreateProductDTO) {
     const productEntity = new ProductEntity();
 
-    productEntity.category = productData.category;
-    productEntity.updatedAt = productData.updatedAt;
-    productEntity.createdAt = productData.createdAt;
-    productEntity.description = productData.description;
-    productEntity.name = productData.name;
-    productEntity.availableQuantity = productData.availableQuantity;
-    productEntity.value = productData.value;
-    productEntity.images = productData.images;
-    productEntity.specifications = productData.specifications;
+    Object.assign(productEntity, productData as ProductEntity);
 
     return this.productRepository.save(productEntity);
   }
@@ -36,8 +28,8 @@ export class ProductService {
     if (!productExist) {
       throw new NotFoundException('Product not found!');
     }
-    const updatedProduct = await this.productRepository.update(id, newData);
-    return updatedProduct;
+    Object.assign(productExist, newData);
+    return this.productRepository.save(productExist);
   }
 
   async delete(id: string) {
