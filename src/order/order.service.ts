@@ -110,4 +110,19 @@ export class OrderService {
 
     return this.orderRepository.save(order);
   }
+
+  async getUserOrders(userId: string): Promise<OrderEntity[]> {
+    const user = await this.findUser(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
+
+    return this.orderRepository.find({
+      where: { user: { id: user.id } },
+      relations: {
+        user: true,
+      },
+    });
+  }
 }
