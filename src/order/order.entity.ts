@@ -20,7 +20,13 @@ export class OrderEntity {
   @Column({ name: 'total_value', type: 'float', nullable: false })
   totalValue: number;
 
-  @Column({ name: 'status', enum: OrderStatus, nullable: false })
+  @Column({
+    name: 'status',
+    type: 'enum',
+    enum: OrderStatus,
+    enumName: 'order_status',
+    nullable: false,
+  })
   status: OrderStatus;
 
   @CreateDateColumn({ name: 'created_at' })

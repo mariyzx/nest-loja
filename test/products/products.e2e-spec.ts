@@ -128,7 +128,7 @@ describe('Products (e2e)', () => {
       });
     });
 
-    it('should return 200 with null when product not found', async () => {
+    it('should return 404 when product not found', async () => {
       const updateProductDto = {
         name: 'Updated Product',
       };
@@ -138,12 +138,14 @@ describe('Products (e2e)', () => {
       const response = await request(app.getHttpServer())
         .put('/products/non-existent-id')
         .send(updateProductDto)
-        .expect(200);
+        .expect(404);
 
-      expect(response.body).toEqual({
-        produto: null,
-        mensagem: 'Product updated successfully!',
-      });
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          statusCode: 404,
+          message: 'Product not found!',
+        }),
+      );
 
       expect(mockProductRepository.findOneBy).toHaveBeenCalledWith({
         id: 'non-existent-id',

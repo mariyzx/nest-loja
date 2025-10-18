@@ -129,7 +129,7 @@ describe('OrderService', () => {
       userRepository.findOneBy.mockResolvedValueOnce(null);
 
       await expect(service.createOrder(userId, dto)).rejects.toThrow(
-        'User not found',
+        'User not found!',
       );
     });
   });

@@ -55,7 +55,9 @@ describe('Orders (e2e)', () => {
     it('should create a new order', async () => {
       const userId = 'user-1';
       const orderDto = {
-        orderProducts: [{ productId: 'product-1', quantity: 2 }],
+        orderProducts: [
+          { productId: '5535765f-f2b1-4151-b646-d3e66c24faac', quantity: 2 },
+        ],
       };
 
       const user = {
@@ -64,7 +66,7 @@ describe('Orders (e2e)', () => {
         email: 'u@example.com',
       } as unknown as UserEntity;
       const product = {
-        id: 'product-1',
+        id: '5535765f-f2b1-4151-b646-d3e66c24faac',
         name: 'P',
         value: 100,
         availableQuantity: 10,
@@ -120,8 +122,10 @@ describe('Orders (e2e)', () => {
         productOrders: [],
       } as unknown as OrderEntity;
       const updatedOrder = {
-        ...existingOrder,
+        id: orderId,
+        totalValue: 200,
         status: OrderStatus.COMPLETED,
+        productOrders: [],
       } as unknown as OrderEntity;
 
       mockOrderRepository.findOne.mockResolvedValueOnce(existingOrder);
