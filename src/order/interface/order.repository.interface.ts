@@ -6,4 +6,5 @@ export interface IOrderRepository {
   findByUserId(userId: string): Promise<OrderEntity[]>;
   update(id: string, orderData: Partial<OrderEntity>): Promise<OrderEntity>;
   save(order: OrderEntity): Promise<OrderEntity>;
+  delete(idOrder: string): Promise<void>;
 }

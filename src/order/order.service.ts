@@ -105,4 +105,8 @@ export class OrderService {
 
     return await this.orderRepository.findByUserId(user.id);
   }
+
+  async delete(orderId: string): Promise<void> {
+    return await this.orderRepository.delete(orderId);
+  }
 }

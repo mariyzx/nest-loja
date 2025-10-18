@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -34,5 +35,10 @@ export class OrderController {
   @Get()
   async getUserOrders(@Query('userId') userId: string) {
     return this.orderService.getUserOrders(userId);
+  }
+
+  @Delete('/:orderId')
+  async delete(@Param('orderId') orderId: string) {
+    return this.orderService.delete(orderId);
   }
 }

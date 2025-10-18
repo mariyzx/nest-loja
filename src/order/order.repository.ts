@@ -47,4 +47,12 @@ export class OrderRepository implements IOrderRepository {
   async save(order: OrderEntity): Promise<OrderEntity> {
     return await this.ormRepository.save(order);
   }
+
+  async delete(idOrder: string): Promise<void> {
+    const order = await this.findById(idOrder);
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+    await this.ormRepository.delete(idOrder);
+  }
 }
