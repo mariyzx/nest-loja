@@ -5,7 +5,7 @@ import { PostgresConfigService } from './config/postgres.config.service';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './users/user.module';
 import { OrderModule } from './order/order.module';
-import { HttpExceptionFilter } from './filters/http-exception';
+import { GlobalExceptionFilter } from './filters/global-exception';
 
 @Module({
   imports: [
@@ -23,7 +23,7 @@ import { HttpExceptionFilter } from './filters/http-exception';
   providers: [
     {
       provide: 'APP_FILTER',
-      useClass: HttpExceptionFilter,
+      useClass: GlobalExceptionFilter,
     },
   ],
 })
