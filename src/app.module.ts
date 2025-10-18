@@ -6,6 +6,7 @@ import { OrderModule } from './modules/order/order.module';
 import { GlobalExceptionFilter } from './filters/global-exception';
 import { UserModule } from './modules/users/user.module';
 import { ProductsModule } from './modules/products/product.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -19,6 +20,10 @@ import { ProductsModule } from './modules/products/product.module';
       inject: [PostgresConfigService],
     }),
     OrderModule,
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 10000,
+    }),
   ],
   providers: [
     {

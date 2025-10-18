@@ -6,11 +6,13 @@ import {
   Param,
   Post,
   Put,
+  UseInterceptors,
 } from '@nestjs/common';
 
 import { CreateProductDTO } from './dto/CreateProduct.dto';
 import { UpdateProductDTO } from './dto/UpdateProduct';
 import { ProductService } from './product.service';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 
 @Controller('/products')
 export class ProductsController {
@@ -31,7 +33,9 @@ export class ProductsController {
   }
 
   @Get('/:id')
+  @UseInterceptors(CacheInterceptor) // roda um código antes e depois de um controller method
   async getProduct(@Param('id') id: string) {
+    console.log('Fetching product with id:', id);
     return this.productService.getProductById(id);
   }
 
