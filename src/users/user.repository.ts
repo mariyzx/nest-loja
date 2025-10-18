@@ -1,54 +1,63 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
+import { IUserRepository } from './interface/user.repository.interface';
 
 @Injectable()
-export class UserRepository {
-  private users: UserEntity[] = [];
-  async create(userData: UserEntity) {
-    this.users.push(userData);
+export class UserRepository implements IUserRepository {
+  constructor(
+    @InjectRepository(UserEntity)
+    private readonly repository: Repository<UserEntity>,
+  ) {}
 
-    console.log(this.users);
+  async create(userData: UserEntity): Promise<UserEntity> {
+    const user = this.repository.create(userData);
+    return await this.repository.save(user);
   }
 
-  async getUsers() {
-    console.log(this.users);
-    return this.users;
+  async findAll(): Promise<UserEntity[]> {
+    return await this.repository.find();
   }
 
-  async existsWithEmail(email: string) {
-    return this.users.find((u) => u.email === email);
+  async findById(id: string): Promise<UserEntity | null> {
+    return await this.repository.findOne({ where: { id } });
   }
 
-  async update(id: string, novosDados: Partial<UserEntity>) {
-    const user = this.getById(id);
-
-    Object.entries(novosDados).forEach(([key, value]) => {
-      if (key === 'id') {
-        return;
-      }
-
-      if (value) {
-        user[key] = value;
-      }
-    });
-
-    return user;
+  async findByEmail(email: string): Promise<UserEntity | null> {
+    return await this.repository.findOne({ where: { email } });
   }
 
-  private getById(id: string) {
-    const userExists = this.users.find((u) => u.id === id);
+  async existsWithEmail(email: string): Promise<boolean> {
+    const user = await this.findByEmail(email);
+    return !!user;
+  }
 
-    if (!userExists) {
-      throw new Error('User not found!');
+  async update(id: string, userData: Partial<UserEntity>): Promise<UserEntity> {
+    const user = await this.findById(id);
+
+    if (!user) {
+      throw new NotFoundException('User not found!');
     }
 
-    return userExists;
+    // Evita atualizar o ID
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id: _, ...dataToUpdate } = userData;
+
+    Object.assign(user, dataToUpdate);
+
+    return await this.repository.save(user);
   }
 
-  async delete(id: string) {
-    const user = this.getById(id);
+  async delete(id: string): Promise<UserEntity> {
+    const user = await this.findById(id);
 
-    this.users = this.users.filter((u) => u.id !== id);
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
+
+    await this.repository.delete(id);
+
     return user;
   }
 }
