@@ -12,7 +12,7 @@ import {
 import { CreateProductDTO } from './dto/CreateProduct.dto';
 import { UpdateProductDTO } from './dto/UpdateProduct';
 import { ProductService } from './product.service';
-import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
+import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
 
 @Controller('/products')
 export class ProductsController {
@@ -32,7 +32,6 @@ export class ProductsController {
   @Get()
   @UseInterceptors(CacheInterceptor)
   @CacheKey('products:all')
-  @CacheTTL(60000)
   async getProducts() {
     const data = await this.productService.getProducts();
     return data;

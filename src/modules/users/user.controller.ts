@@ -3,21 +3,28 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Post,
   Put,
+  UseInterceptors,
 } from '@nestjs/common';
-import { UserRepository } from './user.repository';
 import { ListUserDTO } from './dto/ListUser.dto';
 import { UpdateUserDTO } from './dto/UpdateUser.dto';
 import { CreateUserDTO } from './dto/CreateUser.dto';
 import { UserService } from './user.service';
+import {
+  Cache,
+  CACHE_MANAGER,
+  CacheInterceptor,
+  CacheKey,
+} from '@nestjs/cache-manager';
 
 @Controller('/users')
 export class UserController {
   constructor(
-    private userRepository: UserRepository,
     private userService: UserService,
+    @Inject(CACHE_MANAGER) private cache: Cache,
   ) {}
 
   @Post()
@@ -30,6 +37,8 @@ export class UserController {
   }
 
   @Get()
+  @UseInterceptors(CacheInterceptor)
+  @CacheKey('users:all')
   async getUsers() {
     const users = await this.userService.getUsers();
     return users;
