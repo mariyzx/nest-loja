@@ -7,6 +7,7 @@ import { GlobalExceptionFilter } from './resources/filters/global-exception';
 import { UserModule } from './modules/users/user.module';
 import { ProductsModule } from './modules/products/product.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { AuthModule } from './modules/auth/auth.module';
 import KeyvRedis from '@keyv/redis';
 
 @Module({
@@ -32,6 +33,7 @@ import KeyvRedis from '@keyv/redis';
         };
       },
     }),
+    AuthModule,
   ],
   providers: [
     {

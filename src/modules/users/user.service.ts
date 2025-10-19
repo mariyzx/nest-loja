@@ -21,6 +21,10 @@ export class UserService {
     return users.map((user) => new ListUserDTO(user.id, user.name));
   }
 
+  async findByEmail(email: string): Promise<UserEntity | null> {
+    return await this.userRepository.findByEmail(email);
+  }
+
   async update(id: string, userEntity: UpdateUserDTO): Promise<UserEntity> {
     return await this.userRepository.update(
       id,

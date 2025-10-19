@@ -7,5 +7,4 @@ export interface IUserRepository {
   findByEmail(email: string): Promise<UserEntity | null>;
   update(id: string, userData: Partial<UserEntity>): Promise<UserEntity>;
   delete(id: string): Promise<UserEntity>;
-  existsWithEmail(email: string): Promise<boolean>;
 }
