@@ -12,11 +12,13 @@ import {
 import { CreateProductDTO } from './dto/CreateProduct.dto';
 import { UpdateProductDTO } from './dto/UpdateProduct';
 import { ProductService } from './product.service';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 
 @Controller('/products')
 export class ProductsController {
-  constructor(private productService: ProductService) {}
+  constructor(private productService: ProductService) {
+    console.log('[ProductsController] ✅ Inicializado com CacheInterceptor');
+  }
 
   @Post()
   async create(@Body() productData: CreateProductDTO) {
@@ -29,12 +31,14 @@ export class ProductsController {
 
   @Get()
   @UseInterceptors(CacheInterceptor)
+  @CacheKey('products:all')
+  @CacheTTL(60000)
   async getProducts() {
-    return this.productService.getProducts();
+    const data = await this.productService.getProducts();
+    return data;
   }
 
   @Get('/:id')
-  @UseInterceptors(CacheInterceptor)
   async getProduct(@Param('id') id: string) {
     return this.productService.getProductById(id);
   }

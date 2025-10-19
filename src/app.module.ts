@@ -6,8 +6,8 @@ import { OrderModule } from './modules/order/order.module';
 import { GlobalExceptionFilter } from './filters/global-exception';
 import { UserModule } from './modules/users/user.module';
 import { ProductsModule } from './modules/products/product.module';
-import { redisStore } from 'cache-manager-redis-yet';
 import { CacheModule } from '@nestjs/cache-manager';
+import KeyvRedis from '@keyv/redis';
 
 @Module({
   imports: [
@@ -22,10 +22,15 @@ import { CacheModule } from '@nestjs/cache-manager';
     }),
     OrderModule,
     CacheModule.registerAsync({
-      useFactory: async () => ({
-        store: await redisStore({ ttl: 10 * 1000 }),
-      }),
       isGlobal: true,
+      useFactory: () => {
+        const redisStore = new KeyvRedis('redis://127.0.0.1:6379');
+
+        return {
+          stores: [redisStore],
+          ttl: 60000,
+        };
+      },
     }),
   ],
   providers: [
