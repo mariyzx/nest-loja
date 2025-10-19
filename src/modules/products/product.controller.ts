@@ -40,7 +40,8 @@ export class ProductsController {
 
   @Get('/:id')
   async getProduct(@Param('id') id: string) {
-    return this.productService.getProductById(id);
+    const product = await this.productService.getProductById(id);
+    return product;
   }
 
   @Put('/:id')

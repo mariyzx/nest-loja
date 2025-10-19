@@ -1,12 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ProductEntity } from './product.entity';
 import { CreateProductDTO } from './dto/CreateProduct.dto';
 import { UpdateProductDTO } from './dto/UpdateProduct';
 import { ProductRepository } from './product.repository';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class ProductService {
-  constructor(private readonly productRepository: ProductRepository) {}
+  constructor(
+    private readonly productRepository: ProductRepository,
+    @Inject(CACHE_MANAGER) private cache: Cache,
+  ) {}
 
   async create(productData: CreateProductDTO): Promise<ProductEntity> {
     const productEntity = new ProductEntity();
@@ -19,7 +23,15 @@ export class ProductService {
   }
 
   async getProductById(id: string): Promise<ProductEntity | null> {
-    return await this.productRepository.findById(id);
+    let product = await this.cache.get<ProductEntity>(`product:${id}`);
+
+    if (!product) {
+      console.log('Cache miss for product id:', id);
+      product = await this.productRepository.findById(id);
+      await this.cache.set(`product:${id}`, product);
+    }
+
+    return product;
   }
 
   async update(id: string, newData: UpdateProductDTO): Promise<ProductEntity> {
