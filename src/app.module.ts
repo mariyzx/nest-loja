@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostgresConfigService } from './config/postgres.config.service';
 import { ConfigModule } from '@nestjs/config';
 import { OrderModule } from './modules/order/order.module';
-import { GlobalExceptionFilter } from './filters/global-exception';
+import { GlobalExceptionFilter } from './resources/filters/global-exception';
 import { UserModule } from './modules/users/user.module';
 import { ProductsModule } from './modules/products/product.module';
 import { CacheModule } from '@nestjs/cache-manager';

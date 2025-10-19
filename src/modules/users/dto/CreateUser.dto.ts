@@ -1,15 +1,21 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, Matches } from 'class-validator';
 import { isUniqueEmail } from '../validation/unique-email.validator';
 
 export class CreateUserDTO {
-  @IsString({ message: 'O nome deve ser uma string' })
-  @IsNotEmpty({ message: 'O nome não pode ser vazio' })
+  @IsString({ message: 'Name must be a string' })
+  @IsNotEmpty({ message: 'Name cannot be empty' })
   name: string;
 
-  @IsEmail(undefined, { message: 'O email não é válido' })
-  @isUniqueEmail({ message: 'Já existe um usuário com esse email' })
+  @IsEmail(undefined, { message: 'Email is not valid' })
+  @isUniqueEmail({ message: 'A user with this email already exists' })
   email: string;
 
-  @MinLength(6, { message: 'A senha deve ter no mínimo 6 caracteres' })
+  @Matches(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,30}$/,
+    {
+      message:
+        'Password must contain at least one uppercase letter, one lowercase letter, one number, one special character and be between 6 to 30 characters long',
+    },
+  )
   password: string;
 }

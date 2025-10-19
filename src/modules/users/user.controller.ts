@@ -19,6 +19,7 @@ import {
   CacheInterceptor,
   CacheKey,
 } from '@nestjs/cache-manager';
+import { PasswordHashPipe } from 'src/resources/pipes/password-hash.pipe';
 
 @Controller('/users')
 export class UserController {
@@ -28,8 +29,14 @@ export class UserController {
   ) {}
 
   @Post()
-  async create(@Body() userData: CreateUserDTO) {
-    const createdUser = await this.userService.create(userData);
+  async create(
+    @Body() { password, ...userData }: CreateUserDTO,
+    @Body('password', PasswordHashPipe) hashedPassword: string,
+  ) {
+    const createdUser = await this.userService.create({
+      ...userData,
+      password: hashedPassword,
+    });
     return {
       user: new ListUserDTO(createdUser.id, createdUser.name),
       message: 'User created successfully!',
