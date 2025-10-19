@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -13,6 +14,7 @@ import { UserRepository } from '../../modules/users/user.repository';
 import { ProductRepository } from '../../modules/products/product.repository';
 import { UserEntity } from '../../modules/users/user.entity';
 import { ProductEntity } from '../../modules/products/product.entity';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class OrderService {
@@ -20,12 +22,18 @@ export class OrderService {
     private readonly orderRepository: OrderRepository,
     private readonly userRepository: UserRepository,
     private readonly productRepository: ProductRepository,
+    @Inject(CACHE_MANAGER) private cache: Cache,
   ) {}
   private async findUser(id: string): Promise<UserEntity> {
-    const user = await this.userRepository.findById(id);
+    let user = await this.cache.get<UserEntity>(`user:${id}`);
 
-    if (user === null) {
-      throw new NotFoundException('User not found!');
+    if (!user) {
+      console.log('Cache miss for user id:', id);
+      user = await this.userRepository.findById(id);
+      if (user === null) {
+        throw new NotFoundException('User not found!');
+      }
+      await this.cache.set(`user:${id}`, user);
     }
 
     return user;
@@ -97,13 +105,22 @@ export class OrderService {
   }
 
   async getUserOrders(userId: string): Promise<OrderEntity[]> {
-    const user = await this.findUser(userId);
+    let userOrders = await this.cache.get<OrderEntity[]>(
+      `user_orders:${userId}`,
+    );
 
-    if (!user) {
-      throw new NotFoundException('User not found!');
+    if (!userOrders) {
+      console.log('Cache miss for user orders, user id:', userId);
+      const user = await this.findUser(userId);
+      if (!user) {
+        throw new NotFoundException('User not found!');
+      }
+      userOrders = await this.orderRepository.findByUserId(user.id);
+      await this.cache.set(`user_orders:${userId}`, userOrders);
+      return userOrders;
     }
 
-    return await this.orderRepository.findByUserId(user.id);
+    return userOrders;
   }
 
   async delete(orderId: string): Promise<void> {
