@@ -3,7 +3,7 @@ import { UserService } from '../users/user.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 
-interface UserPayload {
+export interface UserPayload {
   sub: string;
   name: string;
 }
