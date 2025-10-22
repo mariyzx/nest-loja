@@ -10,6 +10,7 @@ import { OrderStatus } from '../../src/modules/order/enum/OrderStatus.enum';
 import { OrderRepository } from '../../src/modules/order/order.repository';
 import { UserRepository } from '../../src/modules/users/user.repository';
 import { ProductRepository } from '../../src/modules/products/product.repository';
+import { AuthGuard } from '../../src/modules/auth/auth.guard';
 
 describe('Orders (e2e)', () => {
   let app: INestApplication;
@@ -31,6 +32,10 @@ describe('Orders (e2e)', () => {
     save: jest.fn(),
   };
 
+  const mockAuthGuard = {
+    canActivate: jest.fn(() => true),
+  };
+
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -41,6 +46,8 @@ describe('Orders (e2e)', () => {
       .useValue(mockUserRepository)
       .overrideProvider(ProductRepository)
       .useValue(mockProductRepository)
+      .overrideGuard(AuthGuard)
+      .useValue(mockAuthGuard)
       .compile();
 
     app = moduleFixture.createNestApplication();
