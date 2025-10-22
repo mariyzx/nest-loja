@@ -1,136 +1,488 @@
-# Loja - API REST com NestJS
+# 🛒 Store - REST API with NestJS
 
-Esta é uma API REST desenvolvida com NestJS para gerenciar uma loja virtual, permitindo o gerenciamento de produtos e usuários.
+A complete REST API developed with NestJS to manage an online store, including user, product, and order management with JWT authentication and Redis cache.
 
-## 🛠️ Tecnologias Utilizadas
+## 🛠️ Technologies Used
 
-- **NestJS** (v11.0.1) - Framework Node.js para construção de aplicações escaláveis
-- **TypeORM** (v0.3.27) - ORM para TypeScript e JavaScript
-- **PostgreSQL** - Banco de dados relacional
-- **Docker** - Containerização do banco de dados
-- **class-validator** e **class-transformer** - Validação de dados
-- **Jest** - Framework de testes
+- **NestJS** (v11.0.1) - Node.js framework for building scalable applications
+- **TypeORM** (v0.3.27) - ORM for TypeScript and JavaScript
+- **PostgreSQL** - Relational database
+- **Redis** - Cache system
+- **JWT** - Authentication and authorization
+- **Docker** - Database and cache containerization
+- **bcrypt** - Password encryption
+- **class-validator** and **class-transformer** - Data validation
+- **Jest** - Testing framework (unit and E2E)
 
-## 🚀 Funcionalidades
+## 🚀 Features
 
-- Gerenciamento de usuários (CRUD)
-- Gerenciamento de produtos (CRUD)
-- Gerenciamento de pedidos (CRUD)
-- Suporte a imagens de produtos
-- Especificações de produtos
-- Validação de dados
-- Validação de email único para usuários
-- Controle de estoque automático
-- Sistema de status de pedidos
+### User Management
+- ✅ Complete user CRUD
+- ✅ Unique email validation
+- ✅ Password hashing with bcrypt
+- ✅ User data caching
 
-## 📋 Pré-requisitos
+### Product Management
+- ✅ Complete product CRUD
+- ✅ Support for multiple product images
+- ✅ Product technical specifications
+- ✅ Product categorization
+- ✅ Product listing cache
 
-- Node.js
-- Docker e Docker Compose
-- npm ou yarn
+### Order Management
+- ✅ Order creation with multiple products
+- ✅ Automatic total value calculation
+- ✅ Automatic stock control
+- ✅ Order status system (PENDING, COMPLETED, CANCELED)
+- ✅ Order history per user
+- ✅ JWT-protected routes
 
-## 🔧 Instalação e Execução
+### Security and Performance
+- ✅ JWT authentication
+- ✅ Authentication guards
+- ✅ Redis cache for better performance
+- ✅ Data validation on all requests
+- ✅ Password hashing
+- ✅ Global exception handling
 
-1. Clone o repositório:
+## 📋 Prerequisites
+
+- Node.js (v18 or higher)
+- Docker and Docker Compose
+- npm or yarn
+
+## 🔧 Installation and Setup
+
+1. **Clone the repository:**
 ```bash
 git clone https://github.com/mariyzx/nest-loja.git
 cd nest-loja
 ```
 
-2. Instale as dependências:
+2. **Install dependencies:**
 ```bash
 npm install
 ```
 
-3. Configure as variáveis de ambiente:
-Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
-```
-DB_USERNAME=seu_usuario
-DB_PASSWORD=sua_senha
-DB_ADMIN_EMAIL=seu_email
+3. **Configure environment variables:**
+
+Create a `.env` file in the project root with the following variables:
+```env
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+DB_DATABASE=loja
+
+# Redis Cache
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# JWT
+JWT_SECRET=your_jwt_secret_key
+
+# Bcrypt
+PASSWORD_SALT=your_password_salt
+
+# Application
+PORT=3000
 ```
 
-4. Inicie o banco de dados com Docker:
+4. **Start services with Docker:**
 ```bash
 docker-compose up -d
 ```
 
-5. Execute a aplicação:
+This will start:
+- PostgreSQL on port 5432
+- Redis on port 6379
+
+5. **Run database migrations:**
 ```bash
-# desenvolvimento
+npm run typeorm migration:run
+```
+
+6. **Start the application:**
+```bash
+# Development mode
 npm run start:dev
 
-## 🧪 Testes
+# Production mode
+npm run build
+npm run start:prod
+```
 
-Para executar os testes:
+The API will be available at `http://localhost:3000`
+
+## 🧪 Testing
+
+The project has complete coverage of unit and E2E tests.
+
+### Running tests
 
 ```bash
-# testes unitários
+# Unit tests
 npm run test
 
-# testes em modo watch (re-executa quando arquivos mudam)
+# Unit tests in watch mode
 npm run test:watch
 
-# cobertura de testes
-npm run test:cov
-
-# testes e2e
+# E2E (end-to-end) tests
 npm run test:e2e
+
+# Test coverage
+npm run test:cov
 ```
 
-### Estrutura de Testes
+### Test Structure
 
-Os testes unitários estão organizados na pasta `test/` com a seguinte estrutura:
-- `test/users/` - Testes para o módulo de usuários
-  - `user.controller.spec.ts` - Testes do UserController
-  - `user.service.spec.ts` - Testes do UserService
-- `test/products/` - Testes para o módulo de produtos
-  - `product.controller.spec.ts` - Testes do ProductsController
-  - `product.service.spec.ts` - Testes do ProductService
+```
+test/
+├── users/
+│   ├── user.controller.spec.ts    # User controller tests
+│   ├── user.service.spec.ts       # User service tests
+│   └── users.e2e-spec.ts          # User E2E tests
+├── products/
+│   ├── product.controller.spec.ts # Product controller tests
+│   ├── product.service.spec.ts    # Product service tests
+│   └── products.e2e-spec.ts       # Product E2E tests
+├── orders/
+│   ├── order.controller.spec.ts   # Order controller tests
+│   ├── order.service.spec.ts      # Order service tests
+│   └── orders.e2e-spec.ts         # Order E2E tests
+└── app.e2e-spec.ts                # Application E2E tests
+```
 
-## 🧪 Testes
+**Test Statistics:**
+- ✅ 29 unit tests
+- ✅ 14 E2E tests
+- ✅ 43 total tests
 
-Para executar os testes:
+### Test coverage
+```bash
+npm run test:cov
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── modules/
+│   ├── users/              # User module
+│   │   ├── dto/           # Data Transfer Objects
+│   │   ├── interface/     # TypeScript interfaces
+│   │   ├── validation/    # Custom validations
+│   │   ├── user.entity.ts
+│   │   ├── user.controller.ts
+│   │   ├── user.service.ts
+│   │   ├── user.repository.ts
+│   │   └── user.module.ts
+│   ├── products/           # Product module
+│   │   ├── dto/
+│   │   ├── interface/
+│   │   ├── product.entity.ts
+│   │   ├── product-image.entity.ts
+│   │   ├── product-specification.entity.ts
+│   │   ├── product.controller.ts
+│   │   ├── product.service.ts
+│   │   ├── product.repository.ts
+│   │   └── product.module.ts
+│   ├── order/              # Order module
+│   │   ├── dto/
+│   │   ├── enum/
+│   │   ├── interface/
+│   │   ├── order.entity.ts
+│   │   ├── product-order.entity.ts
+│   │   ├── order.controller.ts
+│   │   ├── order.service.ts
+│   │   ├── order.repository.ts
+│   │   └── order.module.ts
+│   └── auth/               # Authentication module
+│       ├── dto/
+│       ├── auth.controller.ts
+│       ├── auth.service.ts
+│       ├── auth.guard.ts
+│       └── auth.module.ts
+├── config/                 # Configuration
+│   └── postgres.config.service.ts
+├── db/                     # Database
+│   ├── migrations/        # TypeORM migrations
+│   └── data-source-cli.ts
+├── resources/              # Shared resources
+│   ├── filters/           # Exception filters
+│   └── pipes/             # Custom pipes
+├── app.module.ts
+└── main.ts
+```
+
+## 🔌 API Endpoints
+
+### 🔐 Authentication
+```http
+POST /auth/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+### 👥 Users
+| Method | Endpoint | Description | Authentication |
+|--------|----------|-------------|----------------|
+| POST | `/users` | Create new user | No |
+| GET | `/users` | List all users (cached) | No |
+| PUT | `/users/:id` | Update user | No |
+| DELETE | `/users/:id` | Delete user | No |
+
+**Example - Create User:**
+```http
+POST /users
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123"
+}
+```
+
+### 📦 Products
+| Method | Endpoint | Description | Authentication |
+|--------|----------|-------------|----------------|
+| POST | `/products` | Create new product | No |
+| GET | `/products` | List all products (cached) | No |
+| PUT | `/products/:id` | Update product | No |
+| DELETE | `/products/:id` | Delete product | No |
+
+**Example - Create Product:**
+```http
+POST /products
+Content-Type: application/json
+
+{
+  "name": "Dell Laptop",
+  "value": 3500.00,
+  "availableQuantity": 10,
+  "description": "Dell Inspiron 15 Laptop",
+  "category": "Electronics",
+  "images": [
+    {
+      "url": "https://example.com/image1.jpg",
+      "description": "Front view"
+    }
+  ],
+  "specifications": [
+    {
+      "name": "Processor",
+      "description": "Intel Core i5"
+    }
+  ]
+}
+```
+
+### 🛍️ Orders (JWT Protected)
+| Method | Endpoint | Description | Authentication |
+|--------|----------|-------------|----------------|
+| POST | `/order?userId={id}` | Create new order | **Yes** |
+| GET | `/order?userId={id}` | List user orders | **Yes** |
+| PATCH | `/order/:id` | Update order status | **Yes** |
+| DELETE | `/order/:id` | Delete order | **Yes** |
+
+**Example - Create Order:**
+```http
+POST /order?userId=123e4567-e89b-12d3-a456-426614174000
+Authorization: Bearer {your_jwt_token}
+Content-Type: application/json
+
+{
+  "orderProducts": [
+    {
+      "productId": "123e4567-e89b-12d3-a456-426614174001",
+      "quantity": 2
+    },
+    {
+      "productId": "123e4567-e89b-12d3-a456-426614174002",
+      "quantity": 1
+    }
+  ]
+}
+```
+
+**Example - Update Status:**
+```http
+PATCH /order/123e4567-e89b-12d3-a456-426614174003
+Authorization: Bearer {your_jwt_token}
+Content-Type: application/json
+
+{
+  "status": "COMPLETED"
+}
+```
+
+**Available Order Statuses:**
+- `PENDING` - Pending
+- `COMPLETED` - Completed
+- `CANCELED` - Canceled
+
+## 🗄️ Database
+
+The project uses **PostgreSQL** as the relational database and **Redis** for caching.
+
+### Docker Services
+
+The `docker-compose.yaml` configures the following services:
+
+- **PostgreSQL** (port 5432) - Main database
+- **PGAdmin** (port 8081) - Web interface for PostgreSQL management
+  - Access: `http://localhost:8081`
+  - Email: configured via environment variable
+  - Password: configured via environment variable
+- **Redis** (port 6379) - Cache system
+
+### Migrations
+
+TypeORM migrations manage the database schema:
 
 ```bash
-# testes unitários
-npm run test
+# Run migrations
+npm run typeorm migration:run
 
-# testes e2e
-npm run test:e2e
+# Revert last migration
+npm run typeorm migration:revert
 
-# cobertura de testes
-npm run test:cov
+# Generate new migration
+npm run typeorm migration:generate -- -n MigrationName
+
+# Create empty migration
+npm run typeorm migration:create -- -n MigrationName
 ```
 
-## 📁 Estrutura do Projeto
+### Entities
 
-- `src/`
-  - `config/` - Configurações do projeto
-  - `products/` - Módulo de produtos com entidades, controller, service e DTOs
-  - `users/` - Módulo de usuários com entidades, controller, service e DTOs
-- `test/` - Testes e2e
+- **UserEntity** - System users
+- **ProductEntity** - Store products
+- **ProductImageEntity** - Product images
+- **ProductSpecificationEntity** - Technical specifications
+- **OrderEntity** - Orders
+- **ProductOrderEntity** - Many-to-many relationship between orders and products
 
-## 🔌 Endpoints
+## 💾 Cache
 
-### Usuários
-- `POST /users` - Criar usuário
-- `GET /users` - Listar usuários
-- `PUT /users/:id` - Atualizar usuário
-- `DELETE /users/:id` - Deletar usuário
+The system uses Redis for caching with the following strategies:
 
-### Produtos
-- `POST /products` - Criar produto
-- `GET /products` - Listar produtos
-- `PUT /products/:id` - Atualizar produto
-- `DELETE /products/:id` - Deletar produto
+- **User cache**: Individual cache per user ID with configurable TTL
+- **Product cache**: Complete product listing cache
+- **CacheInterceptor**: Global interceptor for selected GET routes
 
-### Pedidos
-- `POST /order?userId={userId}` - Criar pedido (requer ID do usuário como query parameter)
-- `GET /order` - Listar pedidos
-- `PUT /order/:id` - Atualizar status do pedido
-- `DELETE /order/:id` - Deletar pedido
+## 🔒 Security
 
-## 🗄️ Banco de Dados
+### JWT Authentication
+- Token generated on login with 72-hour expiration
+- Protection of sensitive routes with `AuthGuard`
+- Token payload contains: `sub` (user ID) and `name`
 
-O projeto utiliza PostgreSQL como banco de dados, configurado via Docker Compose. O PGAdmin está incluído para gerenciamento do banco de dados e pode ser acessado em `http://localhost:8081`.
+### Password Hashing
+- Passwords encrypted with bcrypt
+- Configurable salt rounds via environment variable
+- Custom `PasswordHashPipe` for automatic hashing
+
+### Data Validation
+- Automatic DTO validation with `class-validator`
+- Data transformation with `class-transformer`
+- Whitelist enabled (removes undeclared properties)
+- Rejection of non-allowed properties
+
+## 🚀 Available Scripts
+
+```bash
+# Development
+npm run start:dev          # Start in development mode with watch
+npm run start:debug        # Start in debug mode
+
+# Production
+npm run build              # Compile the project
+npm run start:prod         # Start in production mode
+
+# Code Quality
+npm run format             # Format code with Prettier
+npm run lint               # Run ESLint
+
+# Testing
+npm run test               # Unit tests
+npm run test:watch         # Tests in watch mode
+npm run test:cov           # Test coverage
+npm run test:e2e           # E2E tests
+
+# Database
+npm run typeorm            # TypeORM CLI
+```
+
+## 📝 TO-DO List
+
+### 🔨 Features to Implement
+- [ ] **Pagination** - Add pagination to product and order listing
+- [ ] **Search and Filters** - Implement search by name, category, and price range
+- [ ] **Product Reviews** - Allow users to review and rate products
+- [ ] **Shopping Cart** - Implement shopping cart before creating orders
+- [ ] **Email Notifications** - Send email confirmations for orders and password reset
+- [ ] **File Upload** - Upload product images to cloud storage (AWS S3, Cloudinary)
+- [ ] **Wishlists** - Allow users to save favorite products
+- [ ] **Inventory Management** - Low stock alerts and automatic reordering
+- [ ] **Discount Coupons** - Create and apply discount codes to orders
+
+### 🔐 Security Enhancements
+- [ ] **Refresh Tokens** - Implement refresh token strategy
+- [ ] **Rate Limiting** - Add request rate limiting to prevent abuse
+- [ ] **Two-Factor Authentication (2FA)** - Add 2FA for user accounts
+- [ ] **Input Sanitization** - Prevent XSS and SQL injection attacks
+- [ ] **API Versioning** - Implement API versioning (v1, v2)
+
+### 📊 Monitoring and Logging
+- [ ] **Winston Logger** - Implement structured logging with Winston
+- [ ] **Health Checks** - Add health check endpoints
+- [ ] **Performance Monitoring** - Integrate APM (Application Performance Monitoring)
+- [ ] **Error Tracking** - Integrate Sentry or similar for error tracking
+- [ ] **Metrics Dashboard** - Create dashboard for API metrics
+
+### 🧪 Testing Improvements
+- [ ] **Increase Test Coverage** - Aim for 80%+ code coverage
+- [ ] **Integration Tests** - Add more comprehensive integration tests
+
+### 📚 Documentation
+- [ ] **Swagger/OpenAPI** - Generate interactive API documentation
+- [ ] **Postman Collection** - Create and maintain Postman collection
+
+### 🚀 DevOps and Deployment
+- [ ] **CI/CD Pipeline** - Set up GitHub Actions or GitLab CI
+- [ ] **Docker Compose for Production** - Optimize Docker setup for production
+- [ ] **Environment Management** - Separate dev, staging, and production configs
+
+### 📖 Learning Topics
+- [ ] **GraphQL** - Study and potentially migrate some endpoints to GraphQL
+- [ ] **Microservices** - Learn microservices architecture with NestJS
+- [ ] **Message Queues** - Study RabbitMQ or Kafka for async processing
+- [ ] **WebSockets** - Implement real-time features with Socket.io
+- [ ] **CQRS Pattern** - Study Command Query Responsibility Segregation
+- [ ] **Event Sourcing** - Learn event-driven architecture patterns
+- [ ] **DDD (Domain-Driven Design)** - Apply DDD principles to the codebase
+
+## 🤝 Contributing
+
+Contributions are welcome! To contribute:
+
+1. Fork the project
+2. Create a branch for your feature (`git checkout -b feature/MyFeature`)
+3. Commit your changes (`git commit -m 'Add MyFeature'`)
+4. Push to the branch (`git push origin feature/MyFeature`)
+5. Open a Pull Request
+
+## 👩‍💻 Author
+
+**Mariana Werneck** - [@mariyzx](https://github.com/mariyzx)
+
+---
+
+⭐ If this project helped you, consider giving it a star!
