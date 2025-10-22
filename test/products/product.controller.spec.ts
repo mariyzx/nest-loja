@@ -4,6 +4,7 @@ import { ProductService } from '../../src/modules/products/product.service';
 import { CreateProductDTO } from '../../src/modules/products/dto/CreateProduct.dto';
 import { UpdateProductDTO } from '../../src/modules/products/dto/UpdateProduct';
 import { ProductEntity } from '../../src/modules/products/product.entity';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mocked-uuid'),
@@ -65,6 +66,14 @@ describe('ProductsController', () => {
         {
           provide: ProductService,
           useValue: mockProductService,
+        },
+        {
+          provide: CACHE_MANAGER,
+          useValue: {
+            get: jest.fn(),
+            set: jest.fn(),
+            del: jest.fn(),
+          },
         },
       ],
     }).compile();

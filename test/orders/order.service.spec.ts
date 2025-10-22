@@ -90,10 +90,16 @@ describe('OrderService', () => {
     userRepository = userRepoMockFactory();
     productRepository = productRepoMockFactory();
 
+    const mockCache = {
+      get: jest.fn(),
+      set: jest.fn(),
+    };
+
     service = new OrderService(
       orderRepository,
       userRepository,
       productRepository,
+      mockCache as any,
     );
 
     jest.clearAllMocks();

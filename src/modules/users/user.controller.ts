@@ -19,7 +19,7 @@ import {
   CacheInterceptor,
   CacheKey,
 } from '@nestjs/cache-manager';
-import { PasswordHashPipe } from 'src/resources/pipes/password-hash.pipe';
+import { PasswordHashPipe } from '../../resources/pipes/password-hash.pipe';
 
 @Controller('/users')
 export class UserController {

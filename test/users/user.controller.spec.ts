@@ -6,6 +6,8 @@ import { UpdateUserDTO } from '../../src/modules/users/dto/UpdateUser.dto';
 import { ListUserDTO } from '../../src/modules/users/dto/ListUser.dto';
 import { UserEntity } from '../../src/modules/users/user.entity';
 import { UserRepository } from '../../src/modules/users/user.repository';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { ConfigService } from '@nestjs/config';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mocked-uuid'),
@@ -48,6 +50,23 @@ describe('UserController', () => {
           provide: UserRepository,
           useValue: {},
         },
+        {
+          provide: CACHE_MANAGER,
+          useValue: {
+            get: jest.fn(),
+            set: jest.fn(),
+            del: jest.fn(),
+          },
+        },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => {
+              if (key === 'PASSWORD_SALT') return 10;
+              return undefined;
+            }),
+          },
+        },
       ],
     }).compile();
 
@@ -67,13 +86,17 @@ describe('UserController', () => {
         id: 'mocked-uuid',
         name: 'John Doe',
         email: 'john@example.com',
-        password: 'password123',
+        password: 'hashed_password123',
       });
       (service.create as jest.Mock).mockResolvedValueOnce(createdUser);
 
-      const result = await controller.create(dto);
+      const hashedPassword = 'hashed_password123';
+      const result = await controller.create(dto, hashedPassword);
 
-      expect(service.create).toHaveBeenCalledWith(dto);
+      expect(service.create).toHaveBeenCalledWith({
+        ...dto,
+        password: hashedPassword,
+      });
       expect(result).toEqual({
         user: new ListUserDTO('mocked-uuid', 'John Doe'),
         message: 'User created successfully!',

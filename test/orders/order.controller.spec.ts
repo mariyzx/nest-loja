@@ -5,7 +5,8 @@ import { CreateOrderDto } from '../../src/modules/order/dto/CreateOrder.dto';
 import { UpdateOrderDto } from '../../src/modules/order/dto/UpdateOrder.dto';
 import { OrderStatus } from '../../src/modules/order/enum/OrderStatus.enum';
 import { OrderEntity } from '../../src/modules/order/order.entity';
-import { UserEntity } from '../../src/users/user.entity';
+import { UserEntity } from '../../src/modules/users/user.entity';
+import { JwtService } from '@nestjs/jwt';
 
 type OrderServiceMock = jest.Mocked<
   Pick<OrderService, 'createOrder' | 'updateOrder'>
@@ -49,6 +50,13 @@ describe('OrderController', () => {
         {
           provide: OrderService,
           useValue: mockOrderService,
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            verifyAsync: jest.fn(),
+            sign: jest.fn(),
+          },
         },
       ],
     }).compile();
