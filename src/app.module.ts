@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { ClassSerializerInterceptor, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostgresConfigService } from './config/postgres.config.service';
 import { ConfigModule } from '@nestjs/config';
@@ -9,6 +9,7 @@ import { ProductsModule } from './modules/products/product.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { AuthModule } from './modules/auth/auth.module';
 import KeyvRedis from '@keyv/redis';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -39,6 +40,10 @@ import KeyvRedis from '@keyv/redis';
     {
       provide: 'APP_FILTER',
       useClass: GlobalExceptionFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ClassSerializerInterceptor,
     },
   ],
 })
