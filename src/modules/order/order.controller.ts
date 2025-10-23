@@ -6,14 +6,14 @@ import {
   Param,
   Patch,
   Post,
-  Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/CreateOrder.dto';
 import { UpdateOrderDto } from './dto/UpdateOrder.dto';
 import { AuthGuard } from '../auth/auth.guard';
-
+import type { AuthenticatedRequest } from '../auth/auth.guard';
 @UseGuards(AuthGuard)
 @Controller('/order')
 export class OrderController {
@@ -21,23 +21,27 @@ export class OrderController {
 
   @Post()
   async create(
-    @Query('userId') userId: string,
+    @Req() req: AuthenticatedRequest,
     @Body() orderData: CreateOrderDto,
   ) {
-    return this.orderService.createOrder(userId, orderData);
+    const { sub } = req.user;
+    return this.orderService.createOrder(sub, orderData);
   }
 
   @Patch('/:orderId')
   async update(
+    @Req() req: AuthenticatedRequest,
     @Param('orderId') orderId: string,
     @Body() orderData: UpdateOrderDto,
   ) {
-    return this.orderService.updateOrder(orderId, orderData);
+    const { sub } = req.user;
+    return this.orderService.updateOrder(sub, orderId, orderData);
   }
 
   @Get()
-  async getUserOrders(@Query('userId') userId: string) {
-    return this.orderService.getUserOrders(userId);
+  async getUserOrders(@Req() req: AuthenticatedRequest) {
+    const { sub } = req.user;
+    return this.orderService.getUserOrders(sub);
   }
 
   @Delete('/:orderId')

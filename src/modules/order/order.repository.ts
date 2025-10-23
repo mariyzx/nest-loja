@@ -34,12 +34,9 @@ export class OrderRepository implements IOrderRepository {
 
   async update(
     id: string,
+    order: OrderEntity,
     orderData: Partial<OrderEntity>,
   ): Promise<OrderEntity> {
-    const order = await this.findById(id);
-    if (!order) {
-      throw new NotFoundException('Order not found');
-    }
     Object.assign(order, orderData);
     return await this.ormRepository.save(order);
   }
@@ -54,5 +51,12 @@ export class OrderRepository implements IOrderRepository {
       throw new NotFoundException('Order not found');
     }
     await this.ormRepository.delete(idOrder);
+  }
+
+  async findOne(id: string): Promise<OrderEntity | null> {
+    return await this.ormRepository.findOne({
+      where: { id },
+      relations: { user: true },
+    });
   }
 }

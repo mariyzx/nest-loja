@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
@@ -98,10 +99,23 @@ export class OrderService {
   }
 
   async updateOrder(
+    userId: string,
     orderId: string,
     orderData: Partial<UpdateOrderDto>,
   ): Promise<OrderEntity> {
-    return await this.orderRepository.update(orderId, orderData);
+    const user = await this.findUser(userId);
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
+    const order = await this.orderRepository.findOne(orderId);
+    if (!order) {
+      throw new NotFoundException('Order not found!');
+    }
+
+    if (order.user.id !== user.id) {
+      throw new ForbiddenException('You are not allowed to update this order.');
+    }
+    return await this.orderRepository.update(orderId, order, orderData);
   }
 
   async getUserOrders(userId: string): Promise<OrderEntity[]> {
