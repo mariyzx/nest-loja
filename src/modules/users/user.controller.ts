@@ -13,20 +13,12 @@ import { ListUserDTO } from './dto/ListUser.dto';
 import { UpdateUserDTO } from './dto/UpdateUser.dto';
 import { CreateUserDTO } from './dto/CreateUser.dto';
 import { UserService } from './user.service';
-import {
-  Cache,
-  CACHE_MANAGER,
-  CacheInterceptor,
-  CacheKey,
-} from '@nestjs/cache-manager';
+import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
 import { PasswordHashPipe } from '../../resources/pipes/password-hash.pipe';
 
 @Controller('/users')
 export class UserController {
-  constructor(
-    private userService: UserService,
-    @Inject(CACHE_MANAGER) private cache: Cache,
-  ) {}
+  constructor(private userService: UserService) {}
 
   @Post()
   async create(
