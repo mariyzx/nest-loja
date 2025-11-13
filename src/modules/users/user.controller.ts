@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Inject,
   Param,
   Post,
   Put,
@@ -22,7 +21,7 @@ export class UserController {
 
   @Post()
   async create(
-    @Body() { password, ...userData }: CreateUserDTO,
+    @Body() { ...userData }: CreateUserDTO,
     @Body('password', PasswordHashPipe) hashedPassword: string,
   ) {
     const createdUser = await this.userService.create({
