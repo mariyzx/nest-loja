@@ -8,6 +8,8 @@ import { UserEntity } from '../../src/modules/users/user.entity';
 import { UserRepository } from '../../src/modules/users/user.repository';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { AuthGuard } from '../../src/modules/auth/auth.guard';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mocked-uuid'),
@@ -67,8 +69,20 @@ describe('UserController', () => {
             }),
           },
         },
+        {
+          provide: JwtService,
+          useValue: {
+            verifyAsync: jest.fn(),
+            sign: jest.fn(),
+          },
+        },
       ],
-    }).compile();
+    })
+      .overrideGuard(AuthGuard)
+      .useValue({
+        canActivate: jest.fn(() => true),
+      })
+      .compile();
 
     controller = module.get<UserController>(UserController);
     jest.clearAllMocks();
@@ -154,7 +168,9 @@ describe('UserController', () => {
 
     it('should throw error when user does not exist', async () => {
       const id = 'missing';
-      (service.delete as jest.Mock).mockResolvedValueOnce(null);
+      (service.delete as jest.Mock).mockRejectedValueOnce(
+        new Error('User not found!'),
+      );
 
       await expect(controller.delete(id)).rejects.toThrow('User not found');
       expect(service.delete).toHaveBeenCalledWith(id);
