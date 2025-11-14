@@ -86,11 +86,14 @@ describe('UserService', () => {
     it('should update and return the updated entity', async () => {
       const id = 'u-1';
       const payload: UpdateUserDTO = { name: 'New Name' } as UpdateUserDTO;
+      const existingUser = makeEntity({ id, name: 'Old Name' });
       const updatedUser = makeEntity({ id, name: 'New Name' });
+      repository.findById.mockResolvedValueOnce(existingUser);
       repository.update.mockResolvedValueOnce(updatedUser);
 
       const result = await service.update(id, payload);
 
+      expect(repository.findById).toHaveBeenCalledWith(id);
       expect(repository.update).toHaveBeenCalledWith(id, payload);
       expect(result).toEqual(updatedUser);
     });
@@ -100,20 +103,23 @@ describe('UserService', () => {
     it('should delete and return the removed entity when exists', async () => {
       const id = 'u-1';
       const entity = makeEntity({ id, name: 'Jane' });
+      repository.findById.mockResolvedValueOnce(entity);
       repository.delete.mockResolvedValueOnce(entity);
 
       const result = await service.delete(id);
 
+      expect(repository.findById).toHaveBeenCalledWith(id);
       expect(repository.delete).toHaveBeenCalledWith(id);
       expect(result).toEqual(entity);
     });
 
     it('should throw NotFoundException when user does not exist', async () => {
       const id = 'missing';
-      repository.delete.mockRejectedValueOnce(new Error('User not found!'));
+      repository.findById.mockResolvedValueOnce(null);
 
       await expect(service.delete(id)).rejects.toThrow('User not found!');
-      expect(repository.delete).toHaveBeenCalledWith(id);
+      expect(repository.findById).toHaveBeenCalledWith(id);
+      expect(repository.delete).not.toHaveBeenCalled();
     });
   });
 });

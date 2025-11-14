@@ -77,47 +77,53 @@ describe('ProductService', () => {
     it('should update when the product exists', async () => {
       const id = 'p-1';
       const payload: Partial<ProductEntity> = { name: 'Novo nome' };
+      const existingProduct = makeEntity({ id, name: 'Nome antigo' });
       const updatedProduct = makeEntity({ id, name: 'Novo nome' });
+      repository.findById.mockResolvedValueOnce(existingProduct);
       repository.update.mockResolvedValueOnce(updatedProduct);
 
       const result = await service.update(id, payload as any);
 
+      expect(repository.findById).toHaveBeenCalledWith(id);
       expect(repository.update).toHaveBeenCalledWith(id, payload as any);
       expect(result).toEqual(updatedProduct);
     });
 
     it('should return NotFoundException when the product does not exist', async () => {
       const id = 'inexistente';
-      repository.update.mockRejectedValueOnce(new Error('Product not found!'));
+      repository.findById.mockResolvedValueOnce(null);
 
       await expect(service.update(id, { name: 'Nome' } as any)).rejects.toThrow(
         'Product not found',
       );
 
-      expect(repository.update).toHaveBeenCalledWith(id, {
-        name: 'Nome',
-      } as any);
+      expect(repository.findById).toHaveBeenCalledWith(id);
+      expect(repository.update).not.toHaveBeenCalled();
     });
   });
 
   describe('delete', () => {
     it('should delete when the product exists', async () => {
       const id = 'p-1';
+      const existingProduct = makeEntity({ id });
       const deletedProduct = makeEntity({ id });
+      repository.findById.mockResolvedValueOnce(existingProduct);
       repository.delete.mockResolvedValueOnce(deletedProduct);
 
       const result = await service.delete(id);
 
+      expect(repository.findById).toHaveBeenCalledWith(id);
       expect(repository.delete).toHaveBeenCalledWith(id);
       expect(result).toEqual(deletedProduct);
     });
 
     it('should return NotFoundException when the product does not exist', async () => {
       const id = 'does-not-exist';
-      repository.delete.mockRejectedValueOnce(new Error('Product not found!'));
+      repository.findById.mockResolvedValueOnce(null);
 
       await expect(service.delete(id)).rejects.toThrow('Product not found');
-      expect(repository.delete).toHaveBeenCalledWith(id);
+      expect(repository.findById).toHaveBeenCalledWith(id);
+      expect(repository.delete).not.toHaveBeenCalled();
     });
   });
 });

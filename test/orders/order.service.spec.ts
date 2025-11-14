@@ -58,6 +58,7 @@ describe('OrderService', () => {
       findByUserId: jest.fn(),
       update: jest.fn(),
       save: jest.fn(),
+      findOne: jest.fn(),
     }) as jest.Mocked<OrderRepository>;
   }
 
@@ -150,29 +151,83 @@ describe('OrderService', () => {
 
   describe('updateOrder', () => {
     it('should update existing order', async () => {
+      const userId = 'user-1';
       const orderId = 'order-1';
-      const updated = makeOrder({ status: OrderStatus.COMPLETED });
+      const user = makeUser({ id: userId });
+      const existingOrder = makeOrder({ id: orderId, user });
+      const updated = makeOrder({ id: orderId, status: OrderStatus.COMPLETED, user });
 
+      const mockCache = {
+        get: jest.fn().mockResolvedValueOnce(null),
+        set: jest.fn(),
+      };
+      service = new OrderService(
+        orderRepository,
+        userRepository,
+        productRepository,
+        mockCache as any,
+      );
+
+      userRepository.findById.mockResolvedValueOnce(user);
+      orderRepository.findOne.mockResolvedValueOnce(existingOrder);
       orderRepository.update.mockResolvedValueOnce(updated);
 
-      const result = await service.updateOrder(orderId, {
+      const result = await service.updateOrder(userId, orderId, {
         status: OrderStatus.COMPLETED,
       });
 
-      expect(orderRepository.update).toHaveBeenCalledWith(orderId, {
+      expect(userRepository.findById).toHaveBeenCalledWith(userId);
+      expect(orderRepository.findOne).toHaveBeenCalledWith(orderId);
+      expect(orderRepository.update).toHaveBeenCalledWith(orderId, existingOrder, {
         status: OrderStatus.COMPLETED,
       });
       expect(result.status).toBe(OrderStatus.COMPLETED);
     });
 
-    it('should throw when order not found', async () => {
-      orderRepository.update.mockRejectedValueOnce(
-        new Error('Order not found'),
+    it('should throw when user not found', async () => {
+      const userId = 'missing';
+      const orderId = 'order-1';
+
+      const mockCache = {
+        get: jest.fn().mockResolvedValueOnce(null),
+        set: jest.fn(),
+      };
+      service = new OrderService(
+        orderRepository,
+        userRepository,
+        productRepository,
+        mockCache as any,
       );
 
+      userRepository.findById.mockResolvedValueOnce(null);
+
       await expect(
-        service.updateOrder('missing', { status: OrderStatus.CANCELED }),
-      ).rejects.toThrow('Order not found');
+        service.updateOrder(userId, orderId, { status: OrderStatus.CANCELED }),
+      ).rejects.toThrow('User not found!');
+    });
+
+    it('should throw when order not found', async () => {
+      const userId = 'user-1';
+      const orderId = 'missing';
+      const user = makeUser({ id: userId });
+
+      const mockCache = {
+        get: jest.fn().mockResolvedValueOnce(null),
+        set: jest.fn(),
+      };
+      service = new OrderService(
+        orderRepository,
+        userRepository,
+        productRepository,
+        mockCache as any,
+      );
+
+      userRepository.findById.mockResolvedValueOnce(user);
+      orderRepository.findOne.mockResolvedValueOnce(null);
+
+      await expect(
+        service.updateOrder(userId, orderId, { status: OrderStatus.CANCELED }),
+      ).rejects.toThrow('Order not found!');
     });
   });
 });

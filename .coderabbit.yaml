@@ -1,0 +1,43 @@
+language: typescript
+reviews:
+  enabled: true
+  
+  paths_filters:
+    - "**/*"
+  
+  review:
+    review_simple_changes: false
+    
+    review_dependency_updates: true
+    
+    review_security_updates: true
+    
+  comments:
+    inline: true
+    
+    general: true
+    
+  suggestions:
+    code_suggestions: true
+    
+    performance_suggestions: true
+    
+    security_suggestions: true
+
+review_status: false
+
+ignore:
+  - "dist/**"
+  - "node_modules/**"
+  - "coverage/**"
+  - "*.spec.ts"
+
+typescript:
+  type_check: true
+  
+  unused_imports: true
+
+code_quality:
+  cyclomatic_complexity: true
+  
+  code_duplication: true
