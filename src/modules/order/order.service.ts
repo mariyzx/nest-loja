@@ -138,6 +138,10 @@ export class OrderService {
   }
 
   async delete(orderId: string): Promise<void> {
+    const order = await this.orderRepository.findOne(orderId);
+    if (!order) {
+      throw new NotFoundException('Order not found!');
+    }
     return await this.orderRepository.delete(orderId);
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserEntity } from './user.entity';
 import { ListUserDTO } from './dto/ListUser.dto';
 import { UpdateUserDTO } from './dto/UpdateUser.dto';
@@ -26,6 +26,10 @@ export class UserService {
   }
 
   async update(id: string, userEntity: UpdateUserDTO): Promise<UserEntity> {
+    const user = await this.userRepository.findById(id);
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
     return await this.userRepository.update(
       id,
       userEntity as Partial<UserEntity>,
@@ -33,6 +37,10 @@ export class UserService {
   }
 
   async delete(id: string): Promise<UserEntity> {
+    const user = await this.userRepository.findById(id);
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
     return await this.userRepository.delete(id);
   }
 }

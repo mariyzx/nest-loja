@@ -5,6 +5,8 @@ import { CreateProductDTO } from '../../src/modules/products/dto/CreateProduct.d
 import { UpdateProductDTO } from '../../src/modules/products/dto/UpdateProduct';
 import { ProductEntity } from '../../src/modules/products/product.entity';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { JwtService } from '@nestjs/jwt';
+import { AuthGuard } from '../../src/modules/auth/auth.guard';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mocked-uuid'),
@@ -75,8 +77,20 @@ describe('ProductsController', () => {
             del: jest.fn(),
           },
         },
+        {
+          provide: JwtService,
+          useValue: {
+            verifyAsync: jest.fn(),
+            sign: jest.fn(),
+          },
+        },
       ],
-    }).compile();
+    })
+      .overrideGuard(AuthGuard)
+      .useValue({
+        canActivate: jest.fn(() => true),
+      })
+      .compile();
 
     controller = module.get<ProductsController>(ProductsController);
     // Como usamos useValue, o service é exatamente o mock

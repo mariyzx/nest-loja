@@ -7,6 +7,8 @@ import { OrderStatus } from '../../src/modules/order/enum/OrderStatus.enum';
 import { OrderEntity } from '../../src/modules/order/order.entity';
 import { UserEntity } from '../../src/modules/users/user.entity';
 import { JwtService } from '@nestjs/jwt';
+import { AuthGuard } from '../../src/modules/auth/auth.guard';
+import type { AuthenticatedRequest } from '../../src/modules/auth/auth.guard';
 
 type OrderServiceMock = jest.Mocked<
   Pick<OrderService, 'createOrder' | 'updateOrder'>
@@ -59,7 +61,12 @@ describe('OrderController', () => {
           },
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(AuthGuard)
+      .useValue({
+        canActivate: jest.fn(() => true),
+      })
+      .compile();
 
     controller = module.get<OrderController>(OrderController);
     service = mockOrderService;
@@ -81,10 +88,14 @@ describe('OrderController', () => {
         ],
       };
 
+      const mockReq = {
+        user: { sub: userId },
+      } as AuthenticatedRequest;
+
       const created = makeOrder({ totalValue: 2 * 100 + 1 * 150 });
       service.createOrder.mockResolvedValueOnce(created);
 
-      const result = await controller.create(userId, dto);
+      const result = await controller.create(mockReq, dto);
 
       expect(service.createOrder).toHaveBeenCalledWith(userId, dto);
       expect(result).toEqual(created);
@@ -93,15 +104,20 @@ describe('OrderController', () => {
 
   describe('PATCH /order/:orderId (update)', () => {
     it('should update order status and return updated order', async () => {
+      const userId = 'user-1';
       const orderId = 'order-1';
       const dto: UpdateOrderDto = { status: OrderStatus.COMPLETED };
+
+      const mockReq = {
+        user: { sub: userId },
+      } as AuthenticatedRequest;
 
       const updated = makeOrder({ status: OrderStatus.COMPLETED });
       service.updateOrder.mockResolvedValueOnce(updated);
 
-      const result = await controller.update(orderId, dto);
+      const result = await controller.update(mockReq, orderId, dto);
 
-      expect(service.updateOrder).toHaveBeenCalledWith(orderId, dto);
+      expect(service.updateOrder).toHaveBeenCalledWith(userId, orderId, dto);
       expect(result.status).toBe(OrderStatus.COMPLETED);
     });
   });
