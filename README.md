@@ -115,6 +115,15 @@ npm run start:prod
 
 The API will be available at `http://localhost:3000`
 
+## 📚 API Documentation
+
+The API includes interactive documentation powered by **Swagger/OpenAPI**.
+
+- **Swagger UI**: Access the interactive API documentation at `http://localhost:3000/api`
+- Test all endpoints directly from your browser
+- View request/response schemas and examples
+- Explore all available routes and their parameters
+
 ## 🧪 Testing
 
 The project has complete coverage of unit and E2E tests.
@@ -289,7 +298,7 @@ npm run typeorm            # TypeORM CLI
 - [ ] **Integration Tests** - Add more comprehensive integration tests
 
 ### 📚 Documentation
-- [ ] **Swagger/OpenAPI** - Generate interactive API documentation
+- [x] **Swagger/OpenAPI** - Generate interactive API documentation
 - [ ] **Postman Collection** - Create and maintain Postman collection
 
 ### 🚀 DevOps and Deployment
