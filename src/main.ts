@@ -35,8 +35,10 @@ async function bootstrap() {
     )
     .build();
 
-  const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, documentFactory);
+  if (process.env.NODE_ENV !== 'production') {
+    const documentFactory = () => SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, documentFactory);
+  }
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -47,6 +49,8 @@ async function bootstrap() {
   );
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3000, () => {
+    console.log(`Server running on port ${process.env.PORT}`);
+  });
 }
 bootstrap();
