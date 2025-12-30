@@ -24,7 +24,7 @@ export class OrderService {
     private readonly userRepository: UserRepository,
     private readonly productRepository: ProductRepository,
     @Inject(CACHE_MANAGER) private cache: Cache,
-  ) {}
+  ) { }
   private async findUser(id: string): Promise<UserEntity> {
     let user = await this.cache.get<UserEntity>(`user:${id}`);
 
@@ -137,10 +137,13 @@ export class OrderService {
     return userOrders;
   }
 
-  async delete(orderId: string): Promise<void> {
+  async delete(userId: string, orderId: string): Promise<void> {
     const order = await this.orderRepository.findOne(orderId);
     if (!order) {
       throw new NotFoundException('Order not found!');
+    }
+    if (order.user.id !== userId) {
+      throw new ForbiddenException('You are not allowed to delete this order.');
     }
     return await this.orderRepository.delete(orderId);
   }

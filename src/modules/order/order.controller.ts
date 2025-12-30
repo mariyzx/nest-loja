@@ -21,7 +21,7 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nes
 @UseGuards(AuthGuard)
 @Controller('/order')
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
+  constructor(private readonly orderService: OrderService) { }
 
   @Post()
   @ApiOperation({ summary: 'Create an order' })
@@ -63,7 +63,10 @@ export class OrderController {
   @ApiOperation({ summary: 'Delete an order' })
   @ApiResponse({ status: 200, description: 'Order deleted successfully' })
   @ApiResponse({ status: 404, description: 'Order not found' })
-  async delete(@Param('orderId') orderId: string) {
-    return this.orderService.delete(orderId);
+  async delete(
+    @Req() req: AuthenticatedRequest,
+    @Param('orderId') orderId: string) {
+    const { sub } = req.user;
+    return this.orderService.delete(sub, orderId);
   }
 }
