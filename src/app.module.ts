@@ -13,7 +13,8 @@ import { ProductsModule } from './modules/products/product.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { AuthModule } from './modules/auth/auth.module';
 import KeyvRedis from '@keyv/redis';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -39,6 +40,13 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
       },
     }),
     AuthModule,
+    ThrottlerModule.forRoot({
+      throttlers: [
+        { name: 'short', ttl: 1000, limit: 3 },
+        { name: 'medium', ttl: 60000, limit: 10 },
+        { name: 'long', ttl: 600000, limit: 20 },
+      ]
+    }),
   ],
   providers: [
     {
@@ -50,6 +58,10 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
       useClass: ClassSerializerInterceptor,
     },
     ConsoleLogger,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    }
   ],
 })
-export class AppModule {}
+export class AppModule { }
