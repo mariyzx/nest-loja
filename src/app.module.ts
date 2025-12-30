@@ -31,7 +31,9 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
     CacheModule.registerAsync({
       isGlobal: true,
       useFactory: () => {
-        const redisStore = new KeyvRedis('redis://127.0.0.1:6379');
+        const redisUrl = `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`;
+
+        const redisStore = new KeyvRedis(redisUrl);
 
         return {
           stores: [redisStore],
