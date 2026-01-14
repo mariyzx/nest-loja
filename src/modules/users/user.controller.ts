@@ -20,10 +20,9 @@ import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('/users')
 @ApiTags('users')
-@ApiBearerAuth('JWT-auth')
-@UseGuards(AuthGuard)
+
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(private userService: UserService) { }
 
   @Post()
   @ApiOperation({ summary: 'Create a user' })
@@ -50,6 +49,8 @@ export class UserController {
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Users retrieved successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiBearerAuth('JWT-auth')
+  @UseGuards(AuthGuard)
   async getUsers() {
     const users = await this.userService.getUsers();
     return users;
@@ -60,6 +61,8 @@ export class UserController {
   @ApiBody({ type: UpdateUserDTO })
   @ApiResponse({ status: 200, description: 'User updated successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiBearerAuth('JWT-auth')
+  @UseGuards(AuthGuard)
   async update(@Param('id') id: string, @Body() newData: UpdateUserDTO) {
     const updatedUser = await this.userService.update(id, newData);
 
@@ -73,6 +76,8 @@ export class UserController {
   @ApiOperation({ summary: 'Delete a user' })
   @ApiResponse({ status: 200, description: 'User deleted successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiBearerAuth('JWT-auth')
+  @UseGuards(AuthGuard)
   async delete(@Param('id') id: string) {
     const removedUser = await this.userService.delete(id);
 
